@@ -62,7 +62,10 @@ export default function DonorDashboard() {
             >
               <User className="w-4 h-4" /> Profile
             </button>
-            <button className="flex items-center gap-2 hover:text-red-600 transition-colors">
+            <button 
+              className="flex items-center gap-2 hover:text-red-600 transition-colors"
+              onClick={() => setLocation("/history")}
+            >
               <History className="w-4 h-4" /> History
             </button>
           </div>
@@ -265,7 +268,10 @@ export default function DonorDashboard() {
           >
             <Edit className="w-4 h-4 mr-2" /> Edit Profile
           </Button>
-          <Button className="h-12 px-8 rounded-xl bg-red-600 hover:bg-red-700 shadow-lg font-semibold">
+          <Button 
+            className="h-12 px-8 rounded-xl bg-red-600 hover:bg-red-700 shadow-lg font-semibold"
+            onClick={() => setLocation("/history")}
+          >
             <History className="w-4 h-4 mr-2" /> View Donation History
           </Button>
         </div>
