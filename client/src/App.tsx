@@ -34,14 +34,12 @@ function Router() {
 
 function App() {
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Router />
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
 
