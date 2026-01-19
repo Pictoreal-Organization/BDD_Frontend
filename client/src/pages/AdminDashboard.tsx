@@ -68,7 +68,12 @@ export default function AdminDashboard() {
             >
               Verify
             </button>
-            <button className="hover:text-red-600 transition-colors h-16 px-1">Reports</button>
+            <button 
+              className="hover:text-red-600 transition-colors h-16 px-1"
+              onClick={() => setLocation("/admin/reports")}
+            >
+              Reports
+            </button>
           </div>
 
           <div className="flex items-center gap-4">

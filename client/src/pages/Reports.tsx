@@ -1,0 +1,314 @@
+import { motion } from "framer-motion";
+import { useLocation } from "wouter";
+import { 
+  BarChart3, 
+  PieChart, 
+  LineChart, 
+  TrendingUp, 
+  Users, 
+  Droplet, 
+  Heart, 
+  Calendar, 
+  Download, 
+  Mail, 
+  Clock, 
+  Target,
+  ChevronLeft,
+  FileText,
+  Table
+} from "lucide-react";
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  PieChart as RePieChart, 
+  Pie, 
+  Cell, 
+  LineChart as ReLineChart, 
+  Line, 
+  Area, 
+  AreaChart 
+} from "recharts";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
+const bloodData = [
+  { group: "A+", count: 12 },
+  { group: "A-", count: 8 },
+  { group: "B+", count: 15 },
+  { group: "B-", count: 5 },
+  { group: "AB+", count: 7 },
+  { group: "AB-", count: 2 },
+  { group: "O+", count: 18 },
+  { group: "O-", count: 8 },
+];
+
+const categoryData = [
+  { name: "Students", value: 60, color: "#DC2626" },
+  { name: "Faculty", value: 10, color: "#EF4444" },
+  { name: "Staff", value: 4, color: "#F87171" },
+  { name: "External", value: 1, color: "#FCA5A5" },
+];
+
+const trendData = [
+  { date: "Mar 01", count: 2 },
+  { date: "Mar 05", count: 8 },
+  { date: "Mar 10", count: 12 },
+  { date: "Mar 15", count: 15 },
+  { date: "Mar 20", count: 22 },
+  { date: "Mar 25", count: 16 },
+];
+
+export default function Reports() {
+  const [, setLocation] = useLocation();
+
+  return (
+    <div className="min-h-screen bg-gray-50/50 pb-20">
+      {/* Top Bar */}
+      <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => setLocation("/admin")}>
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+            <h1 className="text-xl font-display font-bold text-gray-900">Reports & Analytics</h1>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
+              <Input type="date" defaultValue="2025-03-01" className="h-8 w-32 border-none bg-transparent shadow-none text-xs" />
+              <span className="text-gray-400 text-xs">to</span>
+              <Input type="date" defaultValue="2025-03-25" className="h-8 w-32 border-none bg-transparent shadow-none text-xs" />
+            </div>
+            <Button size="sm" className="bg-red-600 hover:bg-red-700 font-bold">Apply</Button>
+          </div>
+        </div>
+      </nav>
+
+      <main className="container mx-auto px-4 py-8 space-y-8 max-w-6xl">
+        {/* Overview Statistics Card */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { label: "Total Registrations", value: "95", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
+            { label: "Total Donations", value: "75", icon: Droplet, color: "text-red-600", bg: "bg-red-50" },
+            { label: "Conversion Rate", value: "78.9%", icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
+            { label: "Lives Saved", value: "~225", icon: Heart, color: "text-pink-600", bg: "bg-pink-50" },
+          ].map((stat, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+            >
+              <Card className="border-none shadow-md bg-white">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shrink-0", stat.bg, stat.color)}>
+                      <stat.icon className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{stat.label}</p>
+                      <p className="text-2xl font-display font-black text-gray-900">{stat.value}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Blood Group Distribution Bar Chart */}
+          <Card className="border-none shadow-xl bg-white overflow-hidden">
+            <CardHeader className="border-b border-gray-50">
+              <CardTitle className="text-lg font-display font-bold flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-red-600" /> Blood Group Distribution
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 h-[350px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={bloodData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                  <XAxis dataKey="group" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 600 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, color: "#9ca3af" }} />
+                  <Tooltip 
+                    cursor={{ fill: '#fef2f2' }}
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Bar dataKey="count" fill="#DC2626" radius={[6, 6, 0, 0]}>
+                    {bloodData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "#DC2626" : "#EF4444"} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Category Breakdown Donut Chart */}
+          <Card className="border-none shadow-xl bg-white overflow-hidden">
+            <CardHeader className="border-b border-gray-50">
+              <CardTitle className="text-lg font-display font-bold flex items-center gap-2">
+                <PieChart className="w-5 h-5 text-red-600" /> Category Breakdown
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 h-[350px] flex items-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <RePieChart>
+                  <Pie
+                    data={categoryData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={80}
+                    outerRadius={110}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {categoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </RePieChart>
+              </ResponsiveContainer>
+              <div className="space-y-3 w-40 shrink-0">
+                {categoryData.map((item, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                    <span className="text-xs font-bold text-gray-700">{item.name}</span>
+                    <span className="text-[10px] text-muted-foreground ml-auto">{Math.round((item.value / 75) * 100)}%</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Daily Donation Trend Line Chart */}
+          <Card className="lg:col-span-2 border-none shadow-xl bg-white overflow-hidden">
+            <CardHeader className="border-b border-gray-50">
+              <CardTitle className="text-lg font-display font-bold flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-red-600" /> Daily Donation Trend
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 h-[350px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={trendData}>
+                  <defs>
+                    <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#DC2626" stopOpacity={0.1}/>
+                      <stop offset="95%" stopColor="#DC2626" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} />
+                  <YAxis axisLine={false} tickLine={false} />
+                  <Tooltip />
+                  <Area type="monotone" dataKey="count" stroke="#DC2626" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Peak Hours & Top Contributors */}
+          <div className="lg:col-span-1 space-y-8">
+            <Card className="border-none shadow-xl bg-white overflow-hidden">
+              <CardHeader className="border-b border-gray-50">
+                <CardTitle className="text-lg font-display font-bold flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-red-600" /> Peak Hours
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                {[
+                  { range: "10:00 AM - 12:00 PM", count: 25 },
+                  { range: "02:00 PM - 04:00 PM", count: 30 },
+                  { range: "09:00 AM - 10:00 AM", count: 12 },
+                ].map((hour, i) => (
+                  <div key={i} className="flex justify-between items-center p-3 rounded-xl bg-gray-50 border border-gray-100">
+                    <span className="text-sm font-medium text-gray-700">{hour.range}</span>
+                    <Badge className="bg-white text-red-600 border-red-100">{hour.count} donations</Badge>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-xl bg-white overflow-hidden">
+              <CardHeader className="border-b border-gray-50">
+                <CardTitle className="text-lg font-display font-bold flex items-center gap-2">
+                  <Target className="w-5 h-5 text-red-600" /> Top Contributors
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                {[
+                  { name: "Computer Science Dept", count: 25 },
+                  { name: "Mechanical Dept", count: 18 },
+                  { name: "Faculty Body", count: 10 },
+                ].map((dept, i) => (
+                  <div key={i} className="flex items-center gap-4">
+                    <div className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center font-bold text-xs">{i+1}</div>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-gray-900">{dept.name}</p>
+                      <p className="text-xs text-muted-foreground">{dept.count} donors provided</p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Export & Email Options */}
+          <div className="lg:col-span-2 space-y-8">
+            <Card className="border-none shadow-xl bg-white overflow-hidden">
+              <CardHeader className="border-b border-gray-50">
+                <CardTitle className="text-lg font-display font-bold flex items-center gap-2">
+                  <Download className="w-5 h-5 text-red-600" /> Export Options
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <Button variant="outline" className="h-20 flex-col gap-2 rounded-2xl border-2 border-gray-50 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all">
+                  <Table className="w-5 h-5" /> Export as CSV
+                </Button>
+                <Button variant="outline" className="h-20 flex-col gap-2 rounded-2xl border-2 border-gray-50 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all">
+                  <FileText className="w-5 h-5" /> Export as PDF
+                </Button>
+                <Button variant="outline" className="h-20 flex-col gap-2 rounded-2xl border-2 border-gray-50 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all">
+                  <BarChart3 className="w-5 h-5" /> Export as Excel
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-xl bg-red-600 text-white overflow-hidden">
+              <CardHeader className="border-b border-white/10">
+                <CardTitle className="text-lg font-display font-bold flex items-center gap-2">
+                  <Mail className="w-5 h-5" /> Email Report
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex-1">
+                    <Input 
+                      placeholder="Send to: admin@college.edu" 
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-12 rounded-xl"
+                    />
+                  </div>
+                  <Button className="h-12 px-8 bg-white text-red-600 hover:bg-red-50 font-bold rounded-xl shadow-lg">
+                    Send Report
+                  </Button>
+                </div>
+                <p className="mt-4 text-xs text-red-100 opacity-70">Reports include all detailed analytics and distribution charts for the selected date range.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

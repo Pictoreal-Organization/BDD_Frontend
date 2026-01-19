@@ -14,6 +14,7 @@ import DonationHistory from "@/pages/DonationHistory";
 import AdminDashboard from "@/pages/AdminDashboard";
 import Registrations from "@/pages/Registrations";
 import Verification from "@/pages/Verification";
+import Reports from "@/pages/Reports";
 
 function Router() {
   return (
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/registrations" component={Registrations} />
       <Route path="/admin/verify" component={Verification} />
+      <Route path="/admin/reports" component={Reports} />
       <Route component={NotFound} />
     </Switch>
   );
