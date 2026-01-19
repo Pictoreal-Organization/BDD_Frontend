@@ -1,9 +1,12 @@
 import { motion } from "framer-motion";
-import { Droplet, Heart } from "lucide-react";
+import { Droplet } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 import heroBg from "@assets/generated_images/abstract_modern_medical_background_with_soft_red_gradients_and_geometric_shapes.png";
 
 export function Hero() {
+  const [, setLocation] = useLocation();
+
   return (
     <div className="relative w-full h-[500px] overflow-hidden rounded-3xl shadow-2xl mb-8 group">
       {/* Background Image with Overlay */}
@@ -38,7 +41,11 @@ export function Hero() {
           </p>
 
           <div className="flex gap-4 pt-4">
-            <Button size="lg" className="bg-white text-red-600 hover:bg-red-50 font-semibold h-12 px-8 rounded-full shadow-lg transition-all hover:scale-105">
+            <Button 
+              size="lg" 
+              className="bg-white text-red-600 hover:bg-red-50 font-semibold h-12 px-8 rounded-full shadow-lg transition-all hover:scale-105"
+              onClick={() => setLocation("/register")}
+            >
               Register to Donate
             </Button>
             <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 h-12 px-8 rounded-full backdrop-blur-sm">

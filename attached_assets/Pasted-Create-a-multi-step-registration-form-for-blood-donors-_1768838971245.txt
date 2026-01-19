@@ -1,0 +1,67 @@
+Create a multi-step registration form for blood donors with 3 steps:
+
+OVERALL LAYOUT:
+- Progress indicator at top showing steps 1/3, 2/3, 3/3
+- Each step shows as circle connected by line, current step highlighted
+- Form centered on page with max-width 600px
+- Clean white card with shadow on light background
+
+STEP 1 - PERSONAL INFORMATION:
+Header: "Register as Blood Donor - Step 1 of 3: Personal Information"
+
+Form fields (all required):
+- Full Name (text input with user icon)
+- Email (email input with envelope icon)
+- Mobile Number (tel input with phone icon, placeholder: +91-XXXXXXXXXX)
+- Category (dropdown: Student, Faculty, Staff, External)
+- Registration Number (text input, conditional - only show if "Student" selected)
+
+Buttons at bottom:
+- "Cancel" (gray, left aligned)
+- "Next Step →" (red, right aligned)
+
+Add real-time validation with green checkmarks for valid fields
+
+STEP 2 - MEDICAL INFORMATION:
+Header: "Register as Blood Donor - Step 2 of 3: Medical Details"
+
+Form fields:
+- Age (number input, min 18, max 65)
+- Weight (number input with "kg" suffix, min 45)
+- Blood Group (dropdown: A+, A-, B+, B-, AB+, AB-, O+, O-)
+- Last Donation Date (date picker, optional)
+- Medical Conditions (textarea, optional, placeholder: "Diabetes, Blood Pressure, etc.")
+
+Info box below with light blue background:
+"ℹ️ Eligibility Criteria:
+- Age: 18-65 years
+- Weight: Minimum 45 kg
+- Gap: 3 months between donations"
+
+Show validation warnings if criteria not met (red text)
+
+Buttons:
+- "← Back" (left)
+- "Next Step →" (right)
+
+STEP 3 - CREATE ACCOUNT:
+Header: "Register as Blood Donor - Step 3 of 3: Create Your Account"
+
+Form fields:
+- Username (text input with user icon)
+- Password (password input with eye icon to show/hide)
+- Confirm Password (password with matching validation)
+- Checkbox: "I agree to terms and conditions"
+- Checkbox: "I certify that all information provided is accurate"
+
+Buttons:
+- "← Back" (left)
+- "Complete Registration" (large red button, right)
+
+SUCCESS MODAL (after completion):
+- Green checkmark icon with success animation
+- "✅ Registration Successful!"
+- Message: "Thank you for registering! Your registration is pending review by our admin team. You will receive an email once approved."
+- "Go to Dashboard" button
+
+Style: Modern, clean, medical theme with red accent colors, smooth transitions between steps, form validation feedback

@@ -4,8 +4,11 @@ import { BloodGrid } from "@/components/dashboard/BloodGrid";
 import { RecentDonors } from "@/components/dashboard/RecentDonors";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function Dashboard() {
+  const [, setLocation] = useLocation();
+
   return (
     <div className="min-h-screen bg-gray-50/50 pb-20">
       {/* Top Navigation */}
@@ -48,7 +51,11 @@ export default function Dashboard() {
                     <h3 className="text-2xl font-bold font-display mb-2">Ready to make a difference?</h3>
                     <p className="text-gray-300">Book your slot at the nearest donation center.</p>
                   </div>
-                  <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100 px-8 font-semibold shadow-lg whitespace-nowrap">
+                  <Button 
+                    size="lg" 
+                    className="bg-white text-gray-900 hover:bg-gray-100 px-8 font-semibold shadow-lg whitespace-nowrap"
+                    onClick={() => setLocation("/register")}
+                  >
                     Register Now
                   </Button>
                 </div>
