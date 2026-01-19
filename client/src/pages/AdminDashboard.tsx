@@ -56,7 +56,12 @@ export default function AdminDashboard() {
           
           <div className="hidden lg:flex items-center gap-6 text-sm font-semibold text-muted-foreground">
             <button className="text-red-600 border-b-2 border-red-600 h-16 px-1">Dashboard</button>
-            <button className="hover:text-red-600 transition-colors h-16 px-1">Registrations</button>
+            <button 
+              className="hover:text-red-600 transition-colors h-16 px-1"
+              onClick={() => setLocation("/admin/registrations")}
+            >
+              Registrations
+            </button>
             <button className="hover:text-red-600 transition-colors h-16 px-1">Verify</button>
             <button className="hover:text-red-600 transition-colors h-16 px-1">Reports</button>
           </div>
@@ -194,7 +199,10 @@ export default function AdminDashboard() {
 
         {/* Bottom Actions */}
         <div className="flex flex-col sm:flex-row gap-4 pt-4">
-          <Button className="h-14 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-lg font-bold shadow-xl">
+          <Button 
+            className="h-14 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-lg font-bold shadow-xl"
+            onClick={() => setLocation("/admin/registrations")}
+          >
             View Pending Registrations
           </Button>
           <Button variant="outline" className="h-14 px-8 rounded-2xl border-gray-200 text-lg font-bold hover:bg-gray-50">

@@ -12,6 +12,7 @@ import DonorDashboard from "@/pages/DonorDashboard";
 import Profile from "@/pages/Profile";
 import DonationHistory from "@/pages/DonationHistory";
 import AdminDashboard from "@/pages/AdminDashboard";
+import Registrations from "@/pages/Registrations";
 
 function Router() {
   return (
@@ -23,6 +24,7 @@ function Router() {
       <Route path="/profile" component={Profile} />
       <Route path="/history" component={DonationHistory} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/registrations" component={Registrations} />
       <Route component={NotFound} />
     </Switch>
   );
