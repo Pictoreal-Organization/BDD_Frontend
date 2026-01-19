@@ -27,7 +27,11 @@ export default function Dashboard() {
             <Button variant="ghost" className="text-muted-foreground hover:text-red-600">
               Campaigns
             </Button>
-            <Button size="sm" className="bg-red-600 hover:bg-red-700 shadow-md">
+            <Button 
+              size="sm" 
+              className="bg-red-600 hover:bg-red-700 shadow-md"
+              onClick={() => setLocation("/login")}
+            >
               <LogIn className="w-4 h-4 mr-2" /> Login
             </Button>
           </div>
