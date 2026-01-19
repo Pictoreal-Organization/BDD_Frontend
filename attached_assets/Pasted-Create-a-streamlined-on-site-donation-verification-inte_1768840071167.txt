@@ -1,0 +1,69 @@
+Create a streamlined on-site donation verification interface:
+
+TOP SECTION:
+- Large title: "🩸 On-Site Donor Verification"
+- Prominent search bar:
+  "Search Approved Donor..."
+  Placeholder: "Name, Mobile, or Reg Number"
+  Large search button with magnifying glass icon
+
+DONOR LIST:
+- Section title: "📋 Approved Donors Today (45)"
+- Scrollable list of cards:
+
+DONOR CARD:
+- Donor name (large, left) | Blood group badge (right, colored)
+- Registration number/category | Phone number
+- Last donation info: "Never" or "Sep 20, 2024 (✅ Eligible)"
+- [Verify & Start Process] button (full width, prominent)
+
+VERIFICATION MODAL (step 1):
+- Title: "Verify Donor Identity"
+- Display donor details:
+  - Name
+  - Blood Group
+  - Reg Number
+  - Mobile
+- Checklist with checkboxes:
+  ☑️ ID verified (Aadhar/College ID)
+  ☑️ Donor present and ready
+- [Cancel] [Proceed to Donation] buttons
+
+DONATION COMPLETION MODAL (step 2):
+- Title: "Complete Donation"
+- Donor name and blood group displayed
+- Radio buttons:
+  "Blood Collected Successfully?"
+  ◉ Yes
+  ○ No (Unable to donate)
+- If Yes selected:
+  "Units Collected:"
+  ◉ 1 unit (350ml) - Standard
+  ○ 2 units (450ml) - Double donation
+  ○ Other: [___] ml
+- Notes textarea (optional)
+- Checkboxes:
+  ☑️ Send thank you email
+  ☑️ Update public dashboard
+- [Cancel] [Complete Donation] buttons
+
+UNABLE TO DONATE MODAL (if "No" selected):
+- Title: "Unable to Donate"
+- Reason dropdown:
+  Options: Low hemoglobin, High/Low blood pressure, Recent illness, Failed medical screening, Donor withdrew, Other
+- Details textarea
+- Next eligible date picker
+- [Cancel] [Save & Close] buttons
+
+SUCCESS MODAL (after completion):
+- Large green checkmark icon with animation
+- "✅ Donation Completed!"
+- Show donor name, blood group, time
+- Stats update:
+  "📊 Updated Statistics:
+  Total Donations Today: 31
+  O+ Donations: 8"
+- "🎉 Toast notification sent to public dashboard!"
+- [Print Certificate] [Verify Next Donor] buttons
+
+Style: Large touch-friendly buttons, clear step-by-step flow, success animations, color-coded actions, modal overlays, optimized for quick tablet/phone use during busy donation drives

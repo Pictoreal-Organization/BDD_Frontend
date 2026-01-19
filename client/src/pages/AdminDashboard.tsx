@@ -62,7 +62,12 @@ export default function AdminDashboard() {
             >
               Registrations
             </button>
-            <button className="hover:text-red-600 transition-colors h-16 px-1">Verify</button>
+            <button 
+              className="hover:text-red-600 transition-colors h-16 px-1"
+              onClick={() => setLocation("/admin/verify")}
+            >
+              Verify
+            </button>
             <button className="hover:text-red-600 transition-colors h-16 px-1">Reports</button>
           </div>
 
@@ -205,7 +210,11 @@ export default function AdminDashboard() {
           >
             View Pending Registrations
           </Button>
-          <Button variant="outline" className="h-14 px-8 rounded-2xl border-gray-200 text-lg font-bold hover:bg-gray-50">
+          <Button 
+            variant="outline" 
+            className="h-14 px-8 rounded-2xl border-gray-200 text-lg font-bold hover:bg-gray-50"
+            onClick={() => setLocation("/admin/verify")}
+          >
             Start Verification Process
           </Button>
         </div>
