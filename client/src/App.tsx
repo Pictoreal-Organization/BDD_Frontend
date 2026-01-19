@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import Register from "@/pages/Register";
 import Login from "@/pages/Login";
+import DonorDashboard from "@/pages/DonorDashboard";
 
 function Router() {
   return (
@@ -15,6 +16,7 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/donor-dashboard" component={DonorDashboard} />
       <Route component={NotFound} />
     </Switch>
   );
