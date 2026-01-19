@@ -50,10 +50,16 @@ export default function DonorDashboard() {
           </div>
           
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-            <button className="flex items-center gap-2 hover:text-red-600 transition-colors">
+            <button 
+              className="flex items-center gap-2 hover:text-red-600 transition-colors"
+              onClick={() => setLocation("/")}
+            >
               <Home className="w-4 h-4" /> Home
             </button>
-            <button className="flex items-center gap-2 hover:text-red-600 transition-colors">
+            <button 
+              className="flex items-center gap-2 hover:text-red-600 transition-colors"
+              onClick={() => setLocation("/profile")}
+            >
               <User className="w-4 h-4" /> Profile
             </button>
             <button className="flex items-center gap-2 hover:text-red-600 transition-colors">
@@ -252,7 +258,11 @@ export default function DonorDashboard() {
 
         {/* Bottom Actions */}
         <div className="mt-12 flex flex-col sm:flex-row justify-center gap-4">
-          <Button variant="outline" className="h-12 px-8 rounded-xl border-gray-200 hover:bg-gray-50 font-semibold">
+          <Button 
+            variant="outline" 
+            className="h-12 px-8 rounded-xl border-gray-200 hover:bg-gray-50 font-semibold"
+            onClick={() => setLocation("/profile")}
+          >
             <Edit className="w-4 h-4 mr-2" /> Edit Profile
           </Button>
           <Button className="h-12 px-8 rounded-xl bg-red-600 hover:bg-red-700 shadow-lg font-semibold">
