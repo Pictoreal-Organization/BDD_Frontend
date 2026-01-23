@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -43,6 +43,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { set } from "react-hook-form";
 
 type Tab = "Pending" | "Approved" | "Rejected" | "All";
 
@@ -57,12 +58,33 @@ interface Registration {
   category: string;
   regNumber?: string;
   status: Tab;
-  time: string;
+  timestamp: number;
   medical: string;
 }
 
-const mockRegistrations: Registration[] = [
-  {
+  // Simulate fetching data from an API
+
+const getTimeAgo = (timestamp: number): string => {
+  const now = Date.now();
+  const diff = now - timestamp;
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes} min${minutes > 1 ? 's' : ''} ago`;
+  if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+  return `${days} day${days > 1 ? 's' : ''} ago`;
+};
+
+export default function Registrations() {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [registrations, setRegistrations] = useState<Registration[]>([]);
+
+  useEffect(() => {
+    const now = Date.now();
+    setRegistrations([{
     id: "1",
     name: "Rahul Sharma",
     email: "rahul@email.com",
@@ -73,7 +95,7 @@ const mockRegistrations: Registration[] = [
     category: "Student",
     regNumber: "CS2021045",
     status: "Pending",
-    time: "5 mins ago",
+    timestamp: now - 5 * 60000,
     medical: "None"
   },
   {
@@ -87,7 +109,7 @@ const mockRegistrations: Registration[] = [
     category: "Student",
     regNumber: "IT2022012",
     status: "Pending",
-    time: "12 mins ago",
+    timestamp: now - 12 * 60000,
     medical: "Minor asthma"
   },
   {
@@ -99,15 +121,53 @@ const mockRegistrations: Registration[] = [
     age: 35,
     weight: 78,
     category: "Staff",
-    status: "Approved",
-    time: "1 hour ago",
+    status: "Pending",
+    timestamp: now - 1 * 3600000,
     medical: "None"
-  }
-];
+  },
+  {
+    id: "4",
+    name: "Sneha Verma",
+    email: "sneha@email.com",
+    mobile: "9567812345",
+    bloodGroup: "AB+",
+    age: 17,
+    weight: 55,
+    category: "Student",
+    regNumber: "EC2023089",
+    status: "Pending",
+    timestamp: now - 2 * 3600000,
+    medical: "None"
+  },
+  {
+    id: "5",
+    name: "Rajesh Kumar",
+    email: "rajesh@email.com",
+    mobile: "9234567890",
+    bloodGroup: "O-",
+    age: 28,
+    weight: 42,
+    category: "Faculty",
+    status: "Pending",
+    timestamp: now - 3 * 3600000,
+    medical: "None"
+  },
+  {
+    id: "6",
+    name: "Meera Iyer",
+    email: "meera@email.com",
+    mobile: "9876501234",
+    bloodGroup: "A-",
+    age: 67,
+    weight: 60,
+    category: "Staff",
+    status: "Pending",
+    timestamp: now - 4 * 3600000,
+    medical: "Diabetes"
+  }]
+);
+}, []);
 
-export default function Registrations() {
-  const [, setLocation] = useLocation();
-  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<Tab>("Pending");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -117,34 +177,51 @@ export default function Registrations() {
   const [rejectModal, setRejectModal] = useState<Registration | null>(null);
 
   const stats = {
-    Pending: 15,
-    Approved: 45,
-    Rejected: 5,
-    All: 65
+    Pending: registrations.filter(r=>r.status==="Pending").length,
+    Approved: registrations.filter(r=>r.status==="Approved").length,
+    Rejected: registrations.filter(r=>r.status==="Rejected").length,
+    All: registrations.length,
   };
 
-  const filtered = mockRegistrations.filter(r => {
+  const filtered = registrations.filter(r => {
     if (activeTab !== "All" && r.status !== activeTab) return false;
     if (searchQuery && !r.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
 
   const handleApprove = () => {
-    toast({
-      title: "Registration Approved",
-      description: `Approval sent to ${approveModal?.name}`,
-    });
-    setApproveModal(null);
-  };
+  if (!approveModal) return;
+
+  setRegistrations(prev => prev.map(r =>r.id === approveModal.id? { ...r, status: "Approved" }: r) );
+
+  // 2. Save to localStorage for Verify tab
+  const approved = JSON.parse(localStorage.getItem("approvedDonors") || "[]");
+
+  localStorage.setItem("approvedDonors",JSON.stringify([...approved, approveModal])
+  );
+  toast({
+    title: "Registration Approved",
+    description: `Approval sent to ${approveModal.name}`,
+  });
+
+  setApproveModal(null);
+};
+
 
   const handleReject = () => {
-    toast({
-      title: "Registration Rejected",
-      description: `Rejection notice sent to ${rejectModal?.name}`,
-      variant: "destructive"
-    });
-    setRejectModal(null);
-  };
+  if (!rejectModal) return;
+
+  setRegistrations(prev =>prev.map(r =>r.id === rejectModal.id  ? { ...r, status: "Rejected" } : r ));
+
+  toast({
+    title: "Registration Rejected",
+    description: `Rejection notice sent to ${rejectModal.name}`,
+    variant: "destructive",
+  });
+
+  setRejectModal(null);
+};
+
 
   return (
     <div className="min-h-screen bg-gray-50/50 pb-20">
@@ -202,7 +279,7 @@ export default function Registrations() {
             </div>
             <div className="flex gap-2">
               <Select>
-                <SelectTrigger className="w-[140px] h-11">
+                <SelectTrigger className="w-35 h-11">
                   <SelectValue placeholder="Blood Group" />
                 </SelectTrigger>
                 <SelectContent>
@@ -212,7 +289,7 @@ export default function Registrations() {
                 </SelectContent>
               </Select>
               <Select>
-                <SelectTrigger className="w-[140px] h-11">
+                <SelectTrigger className="w-35 h-11">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -229,7 +306,7 @@ export default function Registrations() {
         </Card>
 
         {/* Registration List */}
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence mode="popLayout">
             {filtered.map((reg) => (
               <motion.div
@@ -239,132 +316,113 @@ export default function Registrations() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 layout
               >
-                <Card className={cn(
-                  "border-none shadow-md transition-all duration-300",
-                  expandedId === reg.id ? "ring-2 ring-red-100" : ""
-                )}>
-                  <CardContent className="p-0">
-                    <div 
-                      className="p-4 md:p-6 cursor-pointer flex items-center justify-between"
-                      onClick={() => setExpandedId(expandedId === reg.id ? null : reg.id)}
-                    >
+                <Card className="border-none shadow-md hover:shadow-lg transition-all duration-300 h-full">
+                  <CardContent className="p-6 flex flex-col h-full">
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center text-red-600 font-bold text-lg">
+                        <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-red-600 font-bold text-xl">
                           {reg.bloodGroup}
                         </div>
-                        <div className="space-y-1">
+                        <div>
                           <h3 className="text-lg font-display font-bold text-gray-900">{reg.name}</h3>
                           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                             <span>{reg.age} Yrs</span>
                             <span className="w-1 h-1 bg-gray-300 rounded-full" />
                             <span>{reg.category}</span>
-                            {reg.regNumber && (
-                              <>
-                                <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                                <span className="text-red-600 font-medium">{reg.regNumber}</span>
-                              </>
-                            )}
                           </div>
+                          {reg.regNumber && (
+                            <p className="text-sm text-red-600 font-medium mt-1">{reg.regNumber}</p>
+                          )}
                         </div>
                       </div>
+                      {activeTab === "All" && (
+                        <Badge className={cn(
+                          "font-bold",
+                          reg.status === "Approved" ? "bg-emerald-100 text-emerald-700" :
+                          reg.status === "Rejected" ? "bg-red-100 text-red-700" :
+                          "bg-yellow-100 text-yellow-700"
+                        )}>
+                          {reg.status}
+                        </Badge>
+                      )}
+                    </div>
 
-                      <div className="flex items-center gap-6">
-                        <div className="hidden md:block text-right">
-                          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Registered</p>
-                          <p className="text-sm font-medium text-gray-900">{reg.time}</p>
-                        </div>
-                        {expandedId === reg.id ? <ChevronUp className="text-gray-400" /> : <ChevronDown className="text-gray-400" />}
+                    {/* Contact Details */}
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Phone className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-700">{reg.mobile}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Mail className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-700">{reg.email}</span>
                       </div>
                     </div>
 
-                    <AnimatePresence>
-                      {expandedId === reg.id && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="overflow-hidden border-t border-gray-50"
-                        >
-                          <div className="p-6 space-y-8 bg-gray-50/30">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                              {/* Contact & Medical Info */}
-                              <div className="space-y-6">
-                                <div className="space-y-3">
-                                  <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Contact Details</p>
-                                  <div className="flex flex-wrap gap-4">
-                                    <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border border-gray-100">
-                                      <Phone className="w-4 h-4 text-gray-400" />
-                                      <span className="text-sm font-medium">{reg.mobile}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg shadow-sm border border-gray-100">
-                                      <Mail className="w-4 h-4 text-gray-400" />
-                                      <span className="text-sm font-medium">{reg.email}</span>
-                                    </div>
-                                  </div>
-                                </div>
+                    {/* Physical & Medical Info */}
+                    <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-gray-100">
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider">Weight</p>
+                        <p className="text-sm font-bold text-gray-900">{reg.weight} kg</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider">Medical</p>
+                        <p className="text-sm font-bold text-gray-900">{reg.medical}</p>
+                      </div>
+                    </div>
 
-                                <div className="space-y-3">
-                                  <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Physical & Medical</p>
-                                  <div className="flex gap-8">
-                                    <div>
-                                      <p className="text-xs text-muted-foreground">Weight</p>
-                                      <p className="font-bold text-gray-900">{reg.weight} kg</p>
-                                    </div>
-                                    <div>
-                                      <p className="text-xs text-muted-foreground">Medical Conditions</p>
-                                      <p className="font-bold text-gray-900">{reg.medical}</p>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
+                    {/* Eligibility Checklist */}
+                    <div className="space-y-2 mb-4">
+                      <div className={cn("flex items-center gap-2 text-sm", reg.age >= 18 && reg.age <= 65 ? "text-emerald-600" : "text-red-600")}>
+                        {reg.age >= 18 && reg.age <= 65 ? (
+                          <CheckCircle2 className="w-4 h-4" />
+                        ) : (
+                          <XCircle className="w-4 h-4" />
+                        )}
+                        <span>Age eligible (18-65)</span>
+                      </div>
+                      <div className={cn("flex items-center gap-2 text-sm", reg.weight > 45 ? "text-emerald-600" : "text-red-600")}>
+                        {reg.weight > 45 ? (
+                          <CheckCircle2 className="w-4 h-4" />
+                        ) : (
+                          <XCircle className="w-4 h-4" />
+                        )}
+                        <span>Weight eligible (&gt;45kg)</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-emerald-600">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>No recent donation</span>
+                      </div>
+                    </div>
 
-                              {/* Checklist */}
-                              <div className="space-y-3">
-                                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Eligibility Auto-Check</p>
-                                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3">
-                                  <div className="flex items-center gap-3">
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                                    <span className="text-sm">Age eligible (18-65)</span>
-                                  </div>
-                                  <div className="flex items-center gap-3">
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                                    <span className="text-sm">Weight eligible ({">"}45kg)</span>
-                                  </div>
-                                  <div className="flex items-center gap-3">
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                                    <span className="text-sm">No recent donation (3 months)</span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+                    {/* Registration Time */}
+                    <div className="mb-4 text-sm text-muted-foreground">
+                      <Calendar className="w-4 h-4 inline mr-1" />
+                      Registered {getTimeAgo(reg.timestamp)}
+                    </div>
 
-                            <div className="space-y-3">
-                              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Internal Admin Notes</p>
-                              <Textarea placeholder="Add notes for this donor..." className="bg-white border-gray-200" />
-                            </div>
-
-                            <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-100">
-                              <Button 
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6"
-                                onClick={() => setApproveModal(reg)}
-                              >
-                                <CheckCircle2 className="w-4 h-4 mr-2" /> Approve
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                className="text-red-600 border-red-200 hover:bg-red-50 font-bold px-6"
-                                onClick={() => setRejectModal(reg)}
-                              >
-                                <XCircle className="w-4 h-4 mr-2" /> Reject
-                              </Button>
-                              <Button variant="ghost" className="text-gray-500 font-bold ml-auto">
-                                <MessageSquare className="w-4 h-4 mr-2" /> Contact Donor
-                              </Button>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 mt-auto">
+                      <Button 
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setApproveModal(reg);
+                        }}
+                      >
+                        <CheckCircle2 className="w-4 h-4 mr-2" /> Approve
+                      </Button>
+                      <Button 
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setRejectModal(reg);
+                        }}
+                      >
+                        <XCircle className="w-4 h-4 mr-2" /> Reject
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -53,43 +53,13 @@ interface Donor {
   eligible: boolean;
 }
 
-const mockDonors: Donor[] = [
-  {
-    id: "1",
-    name: "Rahul Sharma",
-    bloodGroup: "O+",
-    regNumber: "CS2021045",
-    category: "Student",
-    phone: "9876543210",
-    lastDonation: "Never",
-    eligible: true
-  },
-  {
-    id: "2",
-    name: "Priya Patel",
-    bloodGroup: "A+",
-    regNumber: "IT2022012",
-    category: "Student",
-    phone: "9988776655",
-    lastDonation: "Sep 20, 2024",
-    eligible: true
-  },
-  {
-    id: "3",
-    name: "Amit Singh",
-    bloodGroup: "B-",
-    regNumber: "STF092",
-    category: "Staff",
-    phone: "9123456789",
-    lastDonation: "Jan 15, 2024",
-    eligible: true
-  }
-];
+
 
 export default function Verification() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDonor, setSelectedDonor] = useState<Donor | null>(null);
+  const [approvedDonors, setApprovedDonors] = useState<Donor[]>([]);
   
   // Modal States
   const [step, setStep] = useState<number>(0); // 0: None, 1: Identity, 2: Completion, 3: Success, 4: Unable
@@ -100,6 +70,11 @@ export default function Verification() {
     setSelectedDonor(donor);
     setStep(1);
   };
+
+  useEffect(() => {
+   const stored = JSON.parse(localStorage.getItem("approvedDonors") || "[]");
+   setApprovedDonors(stored);
+   }, []);
 
   const handleComplete = () => {
     if (collectedSuccess === "yes") {
@@ -158,12 +133,12 @@ export default function Verification() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-display font-bold text-gray-800 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-gray-400" /> Approved Donors Today (45)
+              <Clock className="w-5 h-5 text-gray-400" /> Approved Donors Today ({approvedDonors.length})
             </h2>
           </div>
 
           <div className="grid gap-4">
-            {mockDonors.filter(d => d.name.toLowerCase().includes(searchQuery.toLowerCase())).map((donor) => (
+            {approvedDonors.filter(d => d.name.toLowerCase().includes(searchQuery.toLowerCase())).map((donor) => (
               <motion.div key={donor.id} layout>
                 <Card className="border-none shadow-md hover:shadow-lg transition-all bg-white overflow-hidden">
                   <CardContent className="p-6">
