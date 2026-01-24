@@ -15,7 +15,9 @@ import {
   Target,
   ChevronLeft,
   FileText,
-  Table
+  Table,
+  Bell,
+  LogOut
 } from "lucide-react";
 import { 
   BarChart, 
@@ -74,20 +76,44 @@ export default function Reports() {
       {/* Top Bar */}
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => setLocation("/admin")}>
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            <h1 className="text-xl font-display font-bold text-gray-900">Reports & Analytics</h1>
+          <div className="flex items-center gap-2 font-display font-bold text-xl text-red-600">
+            <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white">
+              <Droplet className="w-5 h-5 fill-current" />
+            </div>
+            Admin Panel
           </div>
           
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 bg-gray-50 p-1.5 rounded-xl border border-gray-100">
-              <Input type="date" defaultValue="2025-03-01" className="h-8 w-32 border-none bg-transparent shadow-none text-xs" />
-              <span className="text-gray-400 text-xs">to</span>
-              <Input type="date" defaultValue="2025-03-25" className="h-8 w-32 border-none bg-transparent shadow-none text-xs" />
-            </div>
-            <Button size="sm" className="bg-red-600 hover:bg-red-700 font-bold">Apply</Button>
+          <div className="hidden lg:flex items-center gap-6 text-sm font-semibold text-muted-foreground">
+            <button 
+              className="hover:text-red-600 transition-colors h-16 px-1"
+              onClick={() => setLocation("/admin")}
+            >
+              Dashboard
+            </button>
+            <button 
+              className="hover:text-red-600 transition-colors h-16 px-1"
+              onClick={() => setLocation("/admin/registrations")}
+            >
+              Registrations
+            </button>
+            <button 
+              className="hover:text-red-600 transition-colors h-16 px-1"
+              onClick={() => setLocation("/admin/verify")}
+            >
+              Verify
+            </button>
+            <button className="text-red-600 border-b-2 border-red-600 h-16 px-1">Reports</button>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <span className="hidden sm:inline-block text-sm font-medium">Welcome, Admin Kumar! 👋</span>
+            <Button variant="ghost" size="icon" className="relative text-gray-400">
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setLocation("/login")} className="text-muted-foreground">
+              <LogOut className="w-4 h-4 mr-2" /> Logout
+            </Button>
           </div>
         </div>
       </nav>
@@ -132,7 +158,7 @@ export default function Reports() {
                 <BarChart3 className="w-5 h-5 text-red-600" /> Blood Group Distribution
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 h-[350px]">
+            <CardContent className="p-6 h-87.5">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={bloodData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
@@ -159,7 +185,7 @@ export default function Reports() {
                 <PieChart className="w-5 h-5 text-red-600" /> Category Breakdown
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 h-[350px] flex items-center">
+            <CardContent className="p-6 h-87.5 flex items-center">
               <ResponsiveContainer width="100%" height="100%">
                 <RePieChart>
                   <Pie
@@ -197,7 +223,7 @@ export default function Reports() {
                 <Calendar className="w-5 h-5 text-red-600" /> Daily Donation Trend
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 h-[350px]">
+            <CardContent className="p-6 h-87.5">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={trendData}>
                   <defs>

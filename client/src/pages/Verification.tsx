@@ -14,7 +14,9 @@ import {
   Calendar,
   AlertCircle,
   Clock,
-  Heart
+  Heart,
+  Bell,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -102,13 +104,45 @@ export default function Verification() {
       {/* Top Header */}
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => setLocation("/admin")}>
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            <h1 className="text-xl font-display font-bold text-gray-900">On-Site Donor Verification</h1>
+          <div className="flex items-center gap-2 font-display font-bold text-xl text-red-600">
+            <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white">
+              <Droplet className="w-5 h-5 fill-current" />
+            </div>
+            Admin Panel
           </div>
-          <Droplet className="w-6 h-6 text-red-600 fill-current" />
+          
+          <div className="hidden lg:flex items-center gap-6 text-sm font-semibold text-muted-foreground">
+            <button 
+              className="hover:text-red-600 transition-colors h-16 px-1"
+              onClick={() => setLocation("/admin")}
+            >
+              Dashboard
+            </button>
+            <button 
+              className="hover:text-red-600 transition-colors h-16 px-1"
+              onClick={() => setLocation("/admin/registrations")}
+            >
+              Registrations
+            </button>
+            <button className="text-red-600 border-b-2 border-red-600 h-16 px-1">Verify</button>
+            <button 
+              className="hover:text-red-600 transition-colors h-16 px-1"
+              onClick={() => setLocation("/admin/reports")}
+            >
+              Reports
+            </button>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <span className="hidden sm:inline-block text-sm font-medium">Welcome, Admin Kumar! 👋</span>
+            <Button variant="ghost" size="icon" className="relative text-gray-400">
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setLocation("/login")} className="text-muted-foreground">
+              <LogOut className="w-4 h-4 mr-2" /> Logout
+            </Button>
+          </div>
         </div>
       </nav>
 

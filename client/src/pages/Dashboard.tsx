@@ -49,7 +49,7 @@ export default function Dashboard() {
               <BloodGrid />
               
               {/* Additional Content / CTA Section */}
-              <div className="mt-8 p-8 bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl text-white shadow-2xl relative overflow-hidden">
+              <div className="mt-8 p-8 rounded-2xl text-white shadow-2xl relative overflow-hidden" style={{ background: 'linear-gradient(to right, rgb(17, 24, 39), rgb(31, 41, 55))' }}>
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                   <div>
                     <h3 className="text-2xl font-bold font-display mb-2">Ready to make a difference?</h3>
