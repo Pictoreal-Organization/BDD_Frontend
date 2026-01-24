@@ -24,7 +24,7 @@ export function BloodGrid() {
           </div>
           Blood Group Inventory
         </h2>
-        <span className="text-sm text-muted-foreground">Units Collected vs Target</span>
+        
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

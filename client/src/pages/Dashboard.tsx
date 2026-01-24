@@ -18,7 +18,7 @@ export default function Dashboard() {
             <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white">
               +
             </div>
-            LifeLine
+            Blood Donation Drive'26
           </div>
           <div className="flex gap-4">
             <Button variant="ghost" className="text-muted-foreground hover:text-red-600">

@@ -1,75 +1,51 @@
 import { motion } from "framer-motion";
-import { Droplet } from "lucide-react";
+import { Droplet, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import heroBg from "@assets/generated_images/abstract_modern_medical_background_with_soft_red_gradients_and_geometric_shapes.png";
+import { Card } from "../ui/card";
 
 export function Hero() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="relative w-full h-[500px] overflow-hidden rounded-3xl shadow-2xl mb-8 group">
-      {/* Background Image with Overlay */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-        style={{ backgroundImage: `url(${heroBg})` }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-r from-red-900/90 via-red-800/80 to-transparent" />
-
-      {/* Content */}
-      <div className="relative h-full container mx-auto px-8 flex flex-col justify-center text-white">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="max-w-2xl space-y-6"
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/20 backdrop-blur-md rounded-full">
-              <Droplet className="w-6 h-6 text-red-200 animate-pulse" fill="currentColor" />
-            </div>
-            <span className="font-semibold tracking-wide uppercase text-sm text-red-100">Official Drive 2025</span>
-          </div>
-
-          <h1 className="text-5xl md:text-7xl font-display font-bold leading-tight">
-            Blood Donation <br />
-            <span className="text-red-200">Drive 2025</span>
-          </h1>
-
-          <p className="text-xl text-red-100 font-light max-w-lg">
-            Join our mission to save lives. Your single donation can save up to three lives. Be a hero today.
-          </p>
-
-          <div className="flex gap-4 pt-4">
-            <Button 
-              size="lg" 
-              className="bg-white text-red-600 hover:bg-red-50 font-semibold h-12 px-8 rounded-full shadow-lg transition-all hover:scale-105"
-              onClick={() => setLocation("/register")}
-            >
-              Register to Donate
-            </Button>
-            <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 h-12 px-8 rounded-full backdrop-blur-sm">
-              Learn More
-            </Button>
-          </div>
-        </motion.div>
+   <div className="w-full mb-8">
+  <motion.div
+    initial={{ opacity: 0, scale: 0.95 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ delay: 0.1 }}
+    className="w-full"
+  >
+    {/* 1. Removed 'p-8' from Card so the header touches the edges */}
+    <Card className="relative overflow-hidden bg-white border-none shadow-xl h-full flex flex-col p-0">
+      
+      {/* 2. New Red Header Section */}
+      <div className="bg-red-600 w-full py-4 flex items-center justify-center z-20">
+        <h3 className="text-white text-3xl font-display font-bold uppercase tracking-wider">
+          Total Donors
+        </h3>
       </div>
 
-      {/* Decorative Animated Blood Drop */}
-      <motion.div 
-        animate={{ 
-          y: [0, 10, 0],
-          opacity: [0.8, 1, 0.8]
-        }}
-        transition={{ 
-          duration: 3,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        className="absolute bottom-10 right-10 md:right-32 opacity-20 hidden md:block"
-      >
-        <Droplet className="w-64 h-64 text-white" fill="currentColor" />
-      </motion.div>
-    </div>
+      {/* 3. Main Content Area (Number) */}
+      <div className="p-8 relative z-10 flex flex-col items-center justify-center flex-grow">
+
+        <div className="relative z-10 flex flex-col items-center gap-2">
+          <motion.span 
+            className="text-7xl md:text-9xl font-display font-bold text-red-600"
+            animate={{ scale: [1, 1.02, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            125
+          </motion.span>
+          
+          {/* Trend Indicator (Optional) */}
+          <span className="text-base font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full flex items-center gap-1 mt-2">
+             <TrendingUp className="w-4 h-4" /> +12%
+          </span>
+        </div>
+      </div>
+    </Card>
+  </motion.div>
+</div>
   );
 }
