@@ -1,16 +1,17 @@
 import { motion } from "framer-motion";
-import { TrendingUp, HeartHandshake, Activity } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
 
 export function Hero() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="relative w-full pb-10 md:pb-10 overflow-hidden bg-gradient-to-b from-white to-gray-50/50">
+    <div className="relative w-full pt-6 pb-16 md:pt-10 md:pb-24 overflow-hidden bg-gradient-to-b from-white to-gray-50/50">
       
+
       {/* 2. MERGED STATS RIBBON VISUALIZATION */}
-      <div className="relative w-full max-w-[1400px] mx-auto h-[350px] md:h-[450px] flex justify-center items-center mt-8">
+      {/* Removed margin-top (mt-0) to utilize the space above */}
+      <div className="relative w-full max-w-[1400px] mx-auto h-[350px] md:h-[450px] flex justify-center items-center mt-0">
         
         {/* --- LAYER A: The Infinite Ribbon (SVG Background) --- */}
         <div className="absolute inset-0 flex items-center justify-center z-0">
@@ -35,8 +36,7 @@ export function Hero() {
               </filter>
             </defs>
             
-            {/* The Infinite Ribbon Path - WIDENED to stretch across full width */}
-            {/* Coordinates adjusted: 50 (left) to 950 (right) with center at 500 */}
+            {/* The Infinite Ribbon Path */}
             <motion.path
               d="M 50,150 C 50,20 350,20 500,150 C 650,280 950,280 950,150 C 950,20 650,20 500,150 C 350,280 50,280 50,150 Z"
               fill="none"
@@ -52,20 +52,21 @@ export function Hero() {
         </div>
 
         {/* --- LAYER B: The Two Logos (Left & Right) --- */}
-        {/* Container matches the SVG width logic to place icons in the center of the loops */}
-      <div className="absolute inset-0 w-full flex items-center justify-between px-[5%] md:px-[10%] lg:px-[18%] z-10 pointer-events-none">
+        <div className="absolute inset-0 w-full flex items-center justify-between px-[5%] md:px-[10%] lg:px-[18%] z-10 pointer-events-none">
               
           {/* Left Logo: Pictoreal */}
           <motion.div 
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.8, type: "spring" }}
-            className="bg-white p-2 md:p-3 rounded-full shadow-2xl shadow-red-900/20 border-4 border-red-50 flex items-center justify-center transform hover:scale-110 transition-transform duration-300"
+            // INCREASED SIZE: p-4 to p-6, larger shadow
+            className="bg-white p-4 md:p-6 rounded-full shadow-2xl shadow-red-900/20 border-4 border-red-50 flex items-center justify-center transform hover:scale-110 transition-transform duration-300"
           >
+            {/* INCREASED IMAGE SIZE: w-32 h-32 on desktop */}
             <img 
               src="/Pictoreal.jpg.jpeg" 
               alt="Pictoreal Logo" 
-              className="w-42 h-42 md:w-20 md:h-20 rounded-full object-cover"
+              className="w-16 h-16 md:w-32 md:h-32 rounded-full object-cover"
             />
           </motion.div>
 
@@ -74,12 +75,14 @@ export function Hero() {
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 1.0, type: "spring" }}
-            className="bg-white p-2 md:p-3 rounded-full shadow-2xl shadow-red-900/20 border-4 border-red-50 flex items-center justify-center transform hover:scale-110 transition-transform duration-300"
+            // INCREASED SIZE
+            className="bg-white p-4 md:p-6 rounded-full shadow-2xl shadow-red-900/20 border-4 border-red-50 flex items-center justify-center transform hover:scale-110 transition-transform duration-300"
           >
+            {/* INCREASED IMAGE SIZE */}
             <img 
               src="/NSS.jpg.jpeg" 
               alt="NSS Logo" 
-              className="w-42 h-42 md:w-20 md:h-20 rounded-full object-cover"
+              className="w-16 h-16 md:w-32 md:h-32 rounded-full object-cover"
             />
           </motion.div>
         </div>
