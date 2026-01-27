@@ -12,16 +12,12 @@ import {
   ChevronRight, 
   ChevronLeft, 
   Info, 
-  Eye, 
-  EyeOff,
-  Droplet,
   Check
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -53,26 +49,18 @@ const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   mobile: z.string().min(10, "Valid mobile number is required"),
   category: z.string().min(1, "Please select a category"),
-  regNumber: z.string().optional(),
+  rollNo: z.string().regex(/^\d{5}$/, "Roll No. must be exactly 5 digits").optional(),
   age: z.coerce.number().min(18, "Minimum age is 18").max(65, "Maximum age is 65"),
   weight: z.coerce.number().min(45, "Minimum weight is 45kg"),
   bloodGroup: z.string().min(1, "Select blood group"),
-  lastDonation: z.string().optional(),
-  medicalConditions: z.string().optional(),
   username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string().min(6, "Please confirm your password"),
   agreeTerms: z.boolean().refine(v => v === true, "You must agree to terms"),
   certifyInfo: z.boolean().refine(v => v === true, "You must certify your info"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
 });
 
 export default function Register() {
   const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
-  const [showPassword, setShowPassword] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   const {
@@ -99,7 +87,7 @@ export default function Register() {
     let fieldsToValidate: any[] = [];
     if (step === 1) {
       fieldsToValidate = ["fullName", "email", "mobile", "category"];
-      if (category === "Student") fieldsToValidate.push("regNumber");
+      if (category === "Student") fieldsToValidate.push("rollNo");
     } else if (step === 2) {
       fieldsToValidate = ["age", "weight", "bloodGroup"];
     }
@@ -244,8 +232,9 @@ export default function Register() {
                         animate={{ opacity: 1, scale: 1 }}
                         className="space-y-2"
                       >
-                        <Label htmlFor="regNumber">Registration Number</Label>
-                        <Input id="regNumber" placeholder="STU12345" {...register("regNumber")} />
+                        <Label htmlFor="rollNo">Roll No.</Label>
+                        <Input id="rollNo" placeholder="12345" {...register("rollNo")} />
+                        {errors.rollNo && <p className="text-xs text-red-500">{errors.rollNo.message}</p>}
                       </motion.div>
                     )}
                   </div>
@@ -289,20 +278,7 @@ export default function Register() {
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="lastDonation">Last Donation Date (Optional)</Label>
-                    <Input id="lastDonation" type="date" {...register("lastDonation")} />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="medicalConditions">Medical Conditions</Label>
-                    <Textarea 
-                      id="medicalConditions" 
-                      placeholder="Diabetes, Blood Pressure, etc."
-                      {...register("medicalConditions")}
-                    />
+                    {errors.bloodGroup && <p className="text-xs text-red-500">{errors.bloodGroup.message}</p>}
                   </div>
 
                   <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg flex gap-3">
@@ -331,35 +307,9 @@ export default function Register() {
                     <Label htmlFor="username">Username</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-                      <Input id="username" className="pl-10" {...register("username")} />
+                      <Input id="username" className="pl-10" placeholder="Unique username" {...register("username")} />
                     </div>
                     {errors.username && <p className="text-xs text-red-500">{errors.username.message}</p>}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <div className="relative">
-                      <Input 
-                        id="password" 
-                        type={showPassword ? "text" : "password"} 
-                        className="pr-10"
-                        {...register("password")}
-                      />
-                      <button 
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm Password</Label>
-                    <Input id="confirmPassword" type="password" {...register("confirmPassword")} />
-                    {errors.confirmPassword && <p className="text-xs text-red-500">{errors.confirmPassword.message}</p>}
                   </div>
 
                   <div className="space-y-4 pt-4">
@@ -409,7 +359,6 @@ export default function Register() {
         </form>
       </Card>
 
-      {/* Success Modal */}
       <Dialog open={isSuccessModalOpen} onOpenChange={setIsSuccessModalOpen}>
         <DialogContent className="sm:max-w-md text-center py-10">
           <DialogHeader>
@@ -418,7 +367,7 @@ export default function Register() {
             </div>
             <DialogTitle className="text-2xl font-bold text-gray-900">Registration Successful!</DialogTitle>
             <DialogDescription className="text-lg pt-4">
-              Thank you for registering! Your registration is pending review by our admin team. You will receive an email once approved.
+              Thank you for registering! Your registration is pending review by our admin team.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-center mt-6">
