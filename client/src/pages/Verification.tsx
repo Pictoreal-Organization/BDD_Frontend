@@ -253,29 +253,26 @@ export default function Verification() {
             <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white">
               <Droplet className="w-5 h-5 fill-current" />
             </div>
-            Admin Panel
+            <span className="hidden sm:inline">Admin Panel</span>
+            <span className="sm:hidden">Admin</span>
           </div>
           
-          <div className="hidden lg:flex items-center gap-6 text-sm font-semibold text-muted-foreground">
-            <button 
-              className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin")}
-            >
-              Dashboard
-            </button>
-            <button 
-              className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin/registrations")}
-            >
-              Registrations
-            </button>
-            <button className="text-red-600 border-b-2 border-red-600 h-16 px-1">Verify</button>
-            <button 
-              className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin/reports")}
-            >
-              Reports
-            </button>
+          <div className="flex-1 overflow-x-auto scrollbar-hide mx-4 lg:flex-initial lg:overflow-visible">
+            <div className="flex items-center justify-center gap-4 lg:gap-6 text-sm font-semibold text-muted-foreground whitespace-nowrap min-w-max lg:min-w-0">
+              <button 
+                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-1"
+                onClick={() => setLocation("/admin")}
+              >
+                Dashboard
+              </button>
+              <button 
+                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-1"
+                onClick={() => setLocation("/admin/registrations")}
+              >
+                Registrations
+              </button>
+              <button className="text-red-600 border-b-2 border-red-600 h-16 px-2 lg:px-1">Verify</button>
+            </div>
           </div>
 
           <div className="flex items-center gap-4">
@@ -285,6 +282,9 @@ export default function Verification() {
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground">
               <LogOut className="w-4 h-4 mr-2" /> Logout
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => setLocation("/login")} className="text-muted-foreground sm:hidden">
+              <LogOut className="w-5 h-5" />
             </Button>
           </div>
         </div>
@@ -296,6 +296,7 @@ export default function Verification() {
           <div className="relative flex-1">
             <Search className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
             <Input 
+              placeholder="Search Approved Donor (Name, Mobile, or Roll No)..." 
               placeholder="Search Approved Donor (Name, Mobile, or Roll No)..." 
               className="pl-12 h-14 text-lg rounded-2xl border-gray-200 shadow-sm bg-white"
               value={searchQuery}
@@ -474,13 +475,13 @@ export default function Verification() {
         </DialogContent>
       </Dialog>
 
-      {/* Variant: Unable to Donate Modal */}
+      {/* Variant: Rejected Modal (simplified) */}
       <Dialog open={step === 4} onOpenChange={(open) => !open && reset()}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md text-center py-10">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-red-600">Unable to Donate</DialogTitle>
-            <DialogDescription>
-              Record the reason why <span className="font-bold">{selectedDonor?.name}</span> could not donate.
+            <DialogTitle className="text-2xl font-bold text-red-600">Donation Rejected</DialogTitle>
+            <DialogDescription className="pt-2">
+              {selectedDonor?.name} has been marked as <span className="font-bold">Rejected</span>.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">

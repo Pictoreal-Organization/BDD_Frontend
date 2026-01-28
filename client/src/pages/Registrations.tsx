@@ -212,29 +212,26 @@ export default function Registrations() {
             <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white">
               <Droplet className="w-5 h-5 fill-current" />
             </div>
-            Admin Panel
+            <span className="hidden sm:inline">Admin Panel</span>
+            <span className="sm:hidden">Admin</span>
           </div>
           
-          <div className="hidden lg:flex items-center gap-6 text-sm font-semibold text-muted-foreground">
-            <button 
-              className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin")}
-            >
-              Dashboard
-            </button>
-            <button className="text-red-600 border-b-2 border-red-600 h-16 px-1">Registrations</button>
-            <button 
-              className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin/verify")}
-            >
-              Verify
-            </button>
-            <button 
-              className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin/reports")}
-            >
-              Reports
-            </button>
+          <div className="flex-1 overflow-x-auto scrollbar-hide mx-4 lg:flex-initial lg:overflow-visible">
+            <div className="flex items-center justify-center gap-4 lg:gap-6 text-sm font-semibold text-muted-foreground whitespace-nowrap min-w-max lg:min-w-0">
+              <button 
+                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-1"
+                onClick={() => setLocation("/admin")}
+              >
+                Dashboard
+              </button>
+              <button className="text-red-600 border-b-2 border-red-600 h-16 px-2 lg:px-1">Registrations</button>
+              <button 
+                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-1"
+                onClick={() => setLocation("/admin/verify")}
+              >
+                Verify
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center gap-4">
@@ -247,6 +244,9 @@ export default function Registrations() {
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground">
               <LogOut className="w-4 h-4 mr-2" /> Logout
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => setLocation("/login")} className="text-muted-foreground sm:hidden">
+              <LogOut className="w-5 h-5" />
             </Button>
           </div>
         </div>
@@ -493,10 +493,6 @@ export default function Registrations() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
-            <div className="space-y-2">
-              <Label>Admin Notes (Optional)</Label>
-              <Textarea placeholder="Add additional instructions..." />
-            </div>
             <div className="flex items-start space-x-2">
               <Checkbox id="send-email" defaultChecked />
               <Label htmlFor="send-email" className="text-sm font-normal leading-tight">

@@ -180,10 +180,11 @@ export default function AdminDashboard() {
             <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white">
               <Droplet className="w-5 h-5 fill-current" />
             </div>
-            Admin Panel
+            <span className="hidden sm:inline">Admin Panel</span>
+            <span className="sm:hidden">Admin</span>
           </div>
           
-          <div className="hidden lg:flex items-center gap-6 text-sm font-semibold text-muted-foreground">
+          <div className="flex items-center gap-3 sm:gap-4 lg:gap-6 text-sm font-semibold text-muted-foreground">
             <button className="text-red-600 border-b-2 border-red-600 h-16 px-1">Dashboard</button>
             <button 
               className="hover:text-red-600 transition-colors h-16 px-1"
@@ -197,12 +198,6 @@ export default function AdminDashboard() {
             >
               Verify
             </button>
-            <button 
-              className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin/reports")}
-            >
-              Reports
-            </button>
           </div>
 
           <div className="flex items-center gap-4">
@@ -215,6 +210,9 @@ export default function AdminDashboard() {
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground">
               <LogOut className="w-4 h-4 mr-2" /> Logout
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => setLocation("/login")} className="text-muted-foreground sm:hidden">
+              <LogOut className="w-5 h-5" />
             </Button>
           </div>
         </div>

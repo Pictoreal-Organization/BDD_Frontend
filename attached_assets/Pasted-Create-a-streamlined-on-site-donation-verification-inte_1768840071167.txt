@@ -4,7 +4,7 @@ TOP SECTION:
 - Large title: "🩸 On-Site Donor Verification"
 - Prominent search bar:
   "Search Approved Donor..."
-  Placeholder: "Name, Mobile, or Reg Number"
+  Placeholder: "Name, Mobile, or Roll No"
   Large search button with magnifying glass icon
 
 DONOR LIST:
@@ -13,7 +13,7 @@ DONOR LIST:
 
 DONOR CARD:
 - Donor name (large, left) | Blood group badge (right, colored)
-- Registration number/category | Phone number
+- Roll No/category | Phone number
 - Last donation info: "Never" or "Sep 20, 2024 (✅ Eligible)"
 - [Verify & Start Process] button (full width, prominent)
 
@@ -22,7 +22,7 @@ VERIFICATION MODAL (step 1):
 - Display donor details:
   - Name
   - Blood Group
-  - Reg Number
+  - Roll No
   - Mobile
 - Checklist with checkboxes:
   ☑️ ID verified (Aadhar/College ID)
