@@ -44,7 +44,7 @@ export default function Profile() {
     email: "rahul@email.com",
     mobile: "9876543210",
     category: "Student",
-    regNumber: "CS2021045",
+    rollNo: "CS2021045",
     bloodGroup: "O+",
     age: "24",
     weight: "65",
@@ -102,7 +102,7 @@ export default function Profile() {
                 { label: "Email", value: profile.email, icon: Mail },
                 { label: "Mobile", value: profile.mobile, icon: Phone, editable: true, key: "mobile" as const },
                 { label: "Category", value: profile.category, icon: History },
-                { label: "Reg Number", value: profile.regNumber, icon: History },
+                { label: "Roll No", value: profile.rollNo, icon: History },
               ].map((item, i) => (
                 <div key={i} className="flex items-center justify-between group">
                   <div className="flex items-center gap-4">

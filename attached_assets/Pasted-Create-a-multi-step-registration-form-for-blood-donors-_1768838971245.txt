@@ -14,7 +14,7 @@ Form fields (all required):
 - Email (email input with envelope icon)
 - Mobile Number (tel input with phone icon, placeholder: +91-XXXXXXXXXX)
 - Category (dropdown: Student, Faculty, Staff, External)
-- Registration Number (text input, conditional - only show if "Student" selected)
+- Roll No (text input, conditional - only show if "Student" selected)
 
 Buttons at bottom:
 - "Cancel" (gray, left aligned)

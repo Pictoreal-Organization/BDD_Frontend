@@ -48,7 +48,7 @@ interface Donor {
   id: string;
   name: string;
   bloodGroup: string;
-  regNumber: string;
+  rollNo: string;
   category: string;
   phone: string;
   lastDonation: string;
@@ -73,8 +73,14 @@ export default function Verification() {
     setStep(1);
   };
 
+  const mockDonors: Donor[] = [
+    { id: "1", name: "Rahul Sharma", bloodGroup: "O+", rollNo: "CS2021045", category: "Student", phone: "9876543210", lastDonation: "3 months ago", eligible: true },
+    { id: "2", name: "Priya Patel", bloodGroup: "A+", rollNo: "IT2022012", category: "Student", phone: "9988776655", lastDonation: "2 months ago", eligible: true },
+    { id: "3", name: "Sneha Verma", bloodGroup: "AB+", rollNo: "EC2023089", category: "Student", phone: "9567812345", lastDonation: "Never", eligible: true },
+  ];
+
   useEffect(() => {
-   const stored = JSON.parse(localStorage.getItem("approvedDonors") || "[]");
+   const stored = JSON.parse(localStorage.getItem("approvedDonors") || JSON.stringify(mockDonors));
    setApprovedDonors(stored);
    }, []);
 
@@ -104,43 +110,39 @@ export default function Verification() {
       {/* Top Header */}
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-display font-bold text-xl text-red-600">
+          <div className="flex items-center gap-2 font-display font-bold text-xl text-red-600 shrink-0 lg:flex-1">
             <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white">
               <Droplet className="w-5 h-5 fill-current" />
             </div>
-            Admin Panel
+            <span className="hidden sm:inline">Admin Panel</span>
+            <span className="sm:hidden">Admin</span>
           </div>
           
-          <div className="hidden lg:flex items-center gap-6 text-sm font-semibold text-muted-foreground">
-            <button 
-              className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin")}
-            >
-              Dashboard
-            </button>
-            <button 
-              className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin/registrations")}
-            >
-              Registrations
-            </button>
-            <button className="text-red-600 border-b-2 border-red-600 h-16 px-1">Verify</button>
-            <button 
-              className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin/reports")}
-            >
-              Reports
-            </button>
+          <div className="flex-1 overflow-x-auto scrollbar-hide mx-4 lg:flex-initial lg:overflow-visible">
+            <div className="flex items-center justify-center gap-4 lg:gap-6 text-sm font-semibold text-muted-foreground whitespace-nowrap min-w-max lg:min-w-0">
+              <button 
+                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-1"
+                onClick={() => setLocation("/admin")}
+              >
+                Dashboard
+              </button>
+              <button 
+                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-1"
+                onClick={() => setLocation("/admin/registrations")}
+              >
+                Registrations
+              </button>
+              <button className="text-red-600 border-b-2 border-red-600 h-16 px-2 lg:px-1">Verify</button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="hidden sm:inline-block text-sm font-medium">Welcome, Admin Kumar! 👋</span>
-            <Button variant="ghost" size="icon" className="relative text-gray-400">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setLocation("/login")} className="text-muted-foreground">
+          <div className="flex items-center gap-4 shrink-0 lg:flex-1 lg:justify-end">
+            <span className="hidden lg:inline-block text-sm font-medium">Welcome, Admin Kumar! 👋</span>
+            <Button variant="ghost" size="sm" onClick={() => setLocation("/login")} className="text-muted-foreground hidden sm:flex">
               <LogOut className="w-4 h-4 mr-2" /> Logout
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => setLocation("/login")} className="text-muted-foreground sm:hidden">
+              <LogOut className="w-5 h-5" />
             </Button>
           </div>
         </div>
@@ -152,7 +154,7 @@ export default function Verification() {
           <div className="relative flex-1">
             <Search className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
             <Input 
-              placeholder="Search Approved Donor (Name, Mobile, or Reg Number)..." 
+              placeholder="Search Approved Donor (Name, Mobile, or Roll No)..." 
               className="pl-12 h-14 text-lg rounded-2xl border-gray-200 shadow-sm bg-white"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -180,7 +182,7 @@ export default function Verification() {
                       <div>
                         <h3 className="text-xl font-bold text-gray-900">{donor.name}</h3>
                         <p className="text-sm text-muted-foreground font-medium">
-                          {donor.regNumber} • {donor.category}
+                          {donor.rollNo} • {donor.category}
                         </p>
                       </div>
                       <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-600 font-black text-lg border border-red-100">
@@ -201,12 +203,30 @@ export default function Verification() {
                       </div>
                     </div>
 
-                    <Button 
-                      className="w-full h-12 bg-red-600 hover:bg-red-700 font-bold rounded-xl shadow-md group"
-                      onClick={() => openVerification(donor)}
-                    >
-                      Verify & Start Process <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button 
+                        className="h-12 bg-red-600 hover:bg-red-700 font-bold rounded-xl shadow-md"
+                        onClick={() => { 
+                          setSelectedDonor(donor); 
+                          setStep(3); 
+                          confetti({
+                            particleCount: 150,
+                            spread: 70,
+                            origin: { y: 0.6 },
+                            colors: ["#DC2626", "#FCA5A5", "#FFFFFF"]
+                          });
+                        }}
+                      >
+                        Completed
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        className="h-12 border-red-200 text-red-700 hover:bg-red-50 font-bold rounded-xl shadow-sm"
+                        onClick={() => { setSelectedDonor(donor); setStep(4); }}
+                      >
+                        Rejected
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -232,15 +252,15 @@ export default function Verification() {
                 <span className="font-bold text-red-600">{selectedDonor?.bloodGroup}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-xs text-muted-foreground uppercase">Reg Number</span>
-                <span className="font-bold">{selectedDonor?.regNumber}</span>
+                <span className="text-xs text-muted-foreground uppercase">Roll No</span>
+                <span className="font-bold">{selectedDonor?.rollNo}</span>
               </div>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center space-x-3 bg-white border p-3 rounded-lg">
                 <Checkbox id="id-verified" />
-                <Label htmlFor="id-verified" className="text-sm font-medium">ID verified (Aadhar/College ID)</Label>
+                <Label htmlFor="id-verified" className="text-sm font-medium">ID verified</Label>
               </div>
               <div className="flex items-center space-x-3 bg-white border p-3 rounded-lg">
                 <Checkbox id="ready" />
@@ -322,45 +342,22 @@ export default function Verification() {
         </DialogContent>
       </Dialog>
 
-      {/* Variant: Unable to Donate Modal */}
+      {/* Variant: Rejected Modal (simplified) */}
       <Dialog open={step === 4} onOpenChange={(open) => !open && reset()}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md text-center py-10">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-red-600">Unable to Donate</DialogTitle>
-            <DialogDescription>
-              Record the reason why <span className="font-bold">{selectedDonor?.name}</span> could not donate.
+            <DialogTitle className="text-2xl font-bold text-red-600">Donation Rejected</DialogTitle>
+            <DialogDescription className="pt-2">
+              {selectedDonor?.name} has been marked as <span className="font-bold">Rejected</span>.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4 space-y-4">
-            <div className="space-y-2">
-              <Label>Reason for Failure</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a reason" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="hb">Low hemoglobin</SelectItem>
-                  <SelectItem value="bp">High/Low blood pressure</SelectItem>
-                  <SelectItem value="ill">Recent illness</SelectItem>
-                  <SelectItem value="med">Failed medical screening</SelectItem>
-                  <SelectItem value="with">Donor withdrew</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Details</Label>
-              <Textarea placeholder="Explain the situation..." />
-            </div>
-            <div className="space-y-2">
-              <Label>Next Eligible Date</Label>
-              <Input type="date" />
-            </div>
+          <div className="mt-4 text-sm text-muted-foreground">
+            <p>Blood Group: <span className="font-bold text-red-600">{selectedDonor?.bloodGroup}</span></p>
+            <p>Roll No: <span className="font-bold">{selectedDonor?.rollNo}</span></p>
           </div>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="ghost" onClick={reset}>Cancel</Button>
+          <DialogFooter className="sm:justify-center mt-6">
             <Button className="bg-gray-900 hover:bg-black text-white px-8 font-bold" onClick={reset}>
-              Save & Close
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

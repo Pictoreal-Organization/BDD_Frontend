@@ -46,6 +46,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { set } from "react-hook-form";
+import api from "@/lib/axios";
+import { log } from "node:console";
 
 type Tab = "Pending" | "Approved" | "Rejected" | "All";
 
@@ -58,7 +60,7 @@ interface Registration {
   age: number;
   weight: number;
   category: string;
-  regNumber?: string;
+  rollNo?: string;
   status: Tab;
   timestamp: number;
   medical: string;
@@ -83,91 +85,26 @@ export default function Registrations() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [bloodGroupFilter, setBloodGroupFilter] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("");
 
-  useEffect(() => {
-    const now = Date.now();
-    setRegistrations([{
-    id: "1",
-    name: "Rahul Sharma",
-    email: "rahul@email.com",
-    mobile: "9876543210",
-    bloodGroup: "O+",
-    age: 24,
-    weight: 65,
-    category: "Student",
-    regNumber: "CS2021045",
-    status: "Pending",
-    timestamp: now - 5 * 60000,
-    medical: "None"
-  },
-  {
-    id: "2",
-    name: "Priya Patel",
-    email: "priya@email.com",
-    mobile: "9988776655",
-    bloodGroup: "A+",
-    age: 21,
-    weight: 52,
-    category: "Student",
-    regNumber: "IT2022012",
-    status: "Pending",
-    timestamp: now - 12 * 60000,
-    medical: "Minor asthma"
-  },
-  {
-    id: "3",
-    name: "Amit Singh",
-    email: "amit@work.com",
-    mobile: "9123456789",
-    bloodGroup: "B-",
-    age: 35,
-    weight: 78,
-    category: "Staff",
-    status: "Pending",
-    timestamp: now - 1 * 3600000,
-    medical: "None"
-  },
-  {
-    id: "4",
-    name: "Sneha Verma",
-    email: "sneha@email.com",
-    mobile: "9567812345",
-    bloodGroup: "AB+",
-    age: 17,
-    weight: 55,
-    category: "Student",
-    regNumber: "EC2023089",
-    status: "Pending",
-    timestamp: now - 2 * 3600000,
-    medical: "None"
-  },
-  {
-    id: "5",
-    name: "Rajesh Kumar",
-    email: "rajesh@email.com",
-    mobile: "9234567890",
-    bloodGroup: "O-",
-    age: 28,
-    weight: 42,
-    category: "Faculty",
-    status: "Pending",
-    timestamp: now - 3 * 3600000,
-    medical: "None"
-  },
-  {
-    id: "6",
-    name: "Meera Iyer",
-    email: "meera@email.com",
-    mobile: "9876501234",
-    bloodGroup: "A-",
-    age: 67,
-    weight: 60,
-    category: "Staff",
-    status: "Pending",
-    timestamp: now - 4 * 3600000,
-    medical: "Diabetes"
-  }]
-);
+useEffect(() => {
+  const fetchRegistrations = async () => {
+    try {
+      const result = await api.get('/donate/admin');
+      console.log(result.data);
+      
+      setRegistrations(result.data);
+    } catch (error) {
+      console.error('Failed to fetch registrations:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load registrations",
+        variant: "destructive",
+      });
+    }
+  };
+  fetchRegistrations();
 }, []);
 
   const [activeTab, setActiveTab] = useState<Tab>("Pending");
@@ -186,8 +123,11 @@ export default function Registrations() {
   };
 
   const filtered = registrations.filter(r => {
-    if (activeTab !== "All" && r.status !== activeTab) return false;
+    
+    // if (activeTab !== "All" && r.status !== activeTab) return false;
     if (searchQuery && !r.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (bloodGroupFilter && bloodGroupFilter !== "all" && r.bloodGroup !== bloodGroupFilter) return false;
+    if (categoryFilter && categoryFilter !== "all" && r.category !== categoryFilter) return false;
     return true;
   });
 
@@ -230,43 +170,39 @@ export default function Registrations() {
       {/* Top Section */}
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-display font-bold text-xl text-red-600">
+          <div className="flex items-center gap-2 font-display font-bold text-xl text-red-600 shrink-0 lg:flex-1">
             <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white">
               <Droplet className="w-5 h-5 fill-current" />
             </div>
-            Admin Panel
+            <span className="hidden sm:inline">Admin Panel</span>
+            <span className="sm:hidden">Admin</span>
           </div>
           
-          <div className="hidden lg:flex items-center gap-6 text-sm font-semibold text-muted-foreground">
-            <button 
-              className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin")}
-            >
-              Dashboard
-            </button>
-            <button className="text-red-600 border-b-2 border-red-600 h-16 px-1">Registrations</button>
-            <button 
-              className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin/verify")}
-            >
-              Verify
-            </button>
-            <button 
-              className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin/reports")}
-            >
-              Reports
-            </button>
+          <div className="flex-1 overflow-x-auto scrollbar-hide mx-4 lg:flex-initial lg:overflow-visible">
+            <div className="flex items-center justify-center gap-4 lg:gap-6 text-sm font-semibold text-muted-foreground whitespace-nowrap min-w-max lg:min-w-0">
+              <button 
+                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-1"
+                onClick={() => setLocation("/admin")}
+              >
+                Dashboard
+              </button>
+              <button className="text-red-600 border-b-2 border-red-600 h-16 px-2 lg:px-1">Registrations</button>
+              <button 
+                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-1"
+                onClick={() => setLocation("/admin/verify")}
+              >
+                Verify
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="hidden sm:inline-block text-sm font-medium">Welcome, Admin Kumar! 👋</span>
-            <Button variant="ghost" size="icon" className="relative text-gray-400">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setLocation("/login")} className="text-muted-foreground">
+          <div className="flex items-center gap-4 shrink-0 lg:flex-1 lg:justify-end">
+            <span className="hidden lg:inline-block text-sm font-medium">Welcome, Admin Kumar! 👋</span>
+            <Button variant="ghost" size="sm" onClick={() => setLocation("/login")} className="text-muted-foreground hidden sm:flex">
               <LogOut className="w-4 h-4 mr-2" /> Logout
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => setLocation("/login")} className="text-muted-foreground sm:hidden">
+              <LogOut className="w-5 h-5" />
             </Button>
           </div>
         </div>
@@ -309,29 +245,28 @@ export default function Registrations() {
               />
             </div>
             <div className="flex gap-2">
-              <Select>
+              <Select value={bloodGroupFilter} onValueChange={setBloodGroupFilter}>
                 <SelectTrigger className="w-35 h-11">
                   <SelectValue placeholder="Blood Group" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All Groups</SelectItem>
                   {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(g => (
                     <SelectItem key={g} value={g}>{g}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <Select>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger className="w-35 h-11">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
                   <SelectItem value="Student">Student</SelectItem>
                   <SelectItem value="Faculty">Faculty</SelectItem>
                   <SelectItem value="Staff">Staff</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" className="h-11 px-4">
-                <Calendar className="w-4 h-4 mr-2" /> Date Range
-              </Button>
             </div>
           </CardContent>
         </Card>
@@ -360,10 +295,10 @@ export default function Registrations() {
                           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                             <span>{reg.age} Yrs</span>
                             <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                            <span>{reg.category}</span>
+                            {/* <span>{reg.category}</span> */}
                           </div>
-                          {reg.regNumber && (
-                            <p className="text-sm text-red-600 font-medium mt-1">{reg.regNumber}</p>
+                          {reg.rollNo && (
+                            <p className="text-sm text-red-600 font-medium mt-1">{reg.rollNo}</p>
                           )}
                         </div>
                       </div>
@@ -481,10 +416,6 @@ export default function Registrations() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
-            <div className="space-y-2">
-              <Label>Admin Notes (Optional)</Label>
-              <Textarea placeholder="Add additional instructions..." />
-            </div>
             <div className="flex items-start space-x-2">
               <Checkbox id="send-email" defaultChecked />
               <Label htmlFor="send-email" className="text-sm font-normal leading-tight">

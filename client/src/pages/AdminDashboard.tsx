@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import api from './../lib/axios';
 import { useLocation } from "wouter";
 import { 
   Droplet, 
@@ -12,7 +13,10 @@ import {
   ChevronRight,
   ShieldCheck,
   UserPlus,
-  ArrowRight
+  ArrowRight,
+  Download,
+  FileText,
+  Table
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,19 +46,21 @@ const activity = [
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
 
+
   return (
     <div className="min-h-screen bg-gray-50/50">
       {/* Top Bar */}
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-display font-bold text-xl text-red-600">
+          <div className="flex items-center gap-2 font-display font-bold text-xl text-red-600 shrink-0 lg:flex-1">
             <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white">
               <Droplet className="w-5 h-5 fill-current" />
             </div>
-            Admin Panel
+            <span className="hidden sm:inline">Admin Panel</span>
+            <span className="sm:hidden">Admin</span>
           </div>
           
-          <div className="hidden lg:flex items-center gap-6 text-sm font-semibold text-muted-foreground">
+          <div className="flex items-center gap-3 sm:gap-4 lg:gap-6 text-sm font-semibold text-muted-foreground">
             <button className="text-red-600 border-b-2 border-red-600 h-16 px-1">Dashboard</button>
             <button 
               className="hover:text-red-600 transition-colors h-16 px-1"
@@ -68,22 +74,15 @@ export default function AdminDashboard() {
             >
               Verify
             </button>
-            <button 
-              className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin/reports")}
-            >
-              Reports
-            </button>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="hidden sm:inline-block text-sm font-medium">Welcome, Admin Kumar! 👋</span>
-            <Button variant="ghost" size="icon" className="relative text-gray-400">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setLocation("/login")} className="text-muted-foreground">
+          <div className="flex items-center gap-4 shrink-0 lg:flex-1 lg:justify-end">
+            <span className="hidden lg:inline-block text-sm font-medium">Welcome, Admin Kumar! 👋</span>
+            <Button variant="ghost" size="sm" onClick={() => setLocation("/login")} className="text-muted-foreground hidden sm:flex">
               <LogOut className="w-4 h-4 mr-2" /> Logout
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => setLocation("/login")} className="text-muted-foreground sm:hidden">
+              <LogOut className="w-5 h-5" />
             </Button>
           </div>
         </div>
@@ -147,82 +146,30 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          {/* Sidebar Area */}
-          <div className="space-y-8">
-            {/* Recent Activity */}
-            <Card className="border-none shadow-xl bg-white overflow-hidden">
-              <CardHeader className="border-b border-gray-50">
-                <CardTitle className="text-lg font-display font-bold flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-red-600" /> Recent Activity
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-6">
-                  {activity.map((item, i) => (
-                    <div key={i} className="flex gap-4">
-                      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", item.bg, item.color)}>
-                        <item.icon className="w-5 h-5" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium text-gray-900 leading-tight">
-                          <span className="font-bold">{item.user}</span> {item.action}
-                        </p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="w-3 h-3" /> {item.time}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <Button variant="ghost" className="w-full mt-6 text-red-600 hover:text-red-700 hover:bg-red-50 text-sm font-bold">
-                  View All Activity <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Action Required Alerts */}
-            <Card className="border-none shadow-xl bg-red-600 text-white overflow-hidden">
-              <CardHeader className="border-b border-white/10">
-                <CardTitle className="text-lg font-display font-bold flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5" /> Action Required
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <button className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold">15 Pending Registrations</p>
-                    <p className="text-xs text-red-100 opacity-80">Requires manual verification</p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </button>
-                <button className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group">
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold">8 Ready to Donate</p>
-                    <p className="text-xs text-red-100 opacity-80">Drive date: Mar 25, 2025</p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </button>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Export Options */}
+          <Card className="border-none shadow-xl bg-white overflow-hidden flex flex-col">
+            <CardHeader className="border-b border-gray-50">
+              <CardTitle className="text-lg font-display font-bold flex items-center gap-2">
+                <Download className="w-5 h-5 text-red-600" /> Export Options
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 flex flex-col gap-6 flex-1">
+              <Button variant="outline" className="h-32 flex-col gap-2 rounded-2xl border-2 border-gray-50 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all">
+                <Table className="w-6 h-6" /> 
+                <span className="font-bold">Export as CSV</span>
+              </Button>
+              <Button variant="outline" className="h-32 flex-col gap-2 rounded-2xl border-2 border-gray-50 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all">
+                <FileText className="w-6 h-6" /> 
+                <span className="font-bold">Export as PDF</span>
+              </Button>
+              <Button variant="outline" className="h-32 flex-col gap-2 rounded-2xl border-2 border-gray-50 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all">
+                <BarChart3 className="w-6 h-6" /> 
+                <span className="font-bold">Export as Excel</span>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Bottom Actions */}
-        <div className="flex flex-col sm:flex-row gap-4 pt-4">
-          <Button 
-            className="h-14 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-lg font-bold shadow-xl"
-            onClick={() => setLocation("/admin/registrations")}
-          >
-            View Pending Registrations
-          </Button>
-          <Button 
-            variant="outline" 
-            className="h-14 px-8 rounded-2xl border-gray-200 text-lg font-bold hover:bg-gray-50"
-            onClick={() => setLocation("/admin/verify")}
-          >
-            Start Verification Process
-          </Button>
-        </div>
       </main>
     </div>
   );
