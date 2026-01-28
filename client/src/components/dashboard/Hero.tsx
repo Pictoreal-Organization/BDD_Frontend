@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { TrendingUp, Droplet, Heart, HeartHandshake, Plus } from "lucide-react";
 import { useLocation } from "wouter";
@@ -5,40 +6,58 @@ import { Button } from "@/components/ui/button";
 
 export function Hero() {
   const [, setLocation] = useLocation();
+  const [donorCount, setDonorCount] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
+        
+        // CHANGED: Fetch from dashboard stats to get granular status counts
+        const response = await fetch(`${API_BASE}/dashboard/stats`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          // Use 'completed' count to show only verified donors who finished the process
+          setDonorCount(data.completed || 0); 
+        }
+      } catch (error) {
+        console.error("Error fetching hero stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCount();
+    // Poll every 30 seconds for live updates
+    const interval = setInterval(fetchCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="relative w-full pt-6 md:pt-10 overflow-hidden bg-gradient-to-b from-white to-gray-50/50 pb-16">
       
       {/* --- BACKGROUND DOODLES SECTION --- */}
-      {/* This layer sits absolutely behind everything with low opacity */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none select-none z-0">
-         {/* Top Left Area */}
          <Droplet className="absolute top-12 left-[10%] w-16 h-16 text-red-200/40 rotate-12" strokeWidth={1.5} />
          <Plus className="absolute top-32 left-[25%] w-8 h-8 text-red-300/30 -rotate-12" strokeWidth={2} />
-         
-         {/* Top Right Area */}
          <Heart className="absolute top-20 right-[15%] w-20 h-20 text-red-200/30 -rotate-6" strokeWidth={1.5} />
          <Droplet className="absolute top-40 right-[30%] w-10 h-10 text-red-100/50 rotate-45" strokeWidth={2} />
-         
-         {/* Middle Area */}
          <HeartHandshake className="absolute top-1/2 left-[5%] -translate-y-1/2 w-24 h-24 text-red-100/40 rotate-12" strokeWidth={1} />
          <Plus className="absolute top-[60%] right-[10%] w-12 h-12 text-red-200/30 rotate-12" strokeWidth={1.5} />
-         
-         {/* Bottom Area */}
          <Heart className="absolute bottom-20 left-[20%] w-14 h-14 text-red-200/40 -rotate-12" strokeWidth={1.5} />
          <Droplet className="absolute bottom-10 right-[25%] w-18 h-18 text-red-100/50 rotate-6" strokeWidth={1.5} />
          <Plus className="absolute bottom-32 left-[40%] w-6 h-6 text-red-300/30 rotate-45" strokeWidth={2} />
       </div>
 
-
-      {/* 1. HERO TEXT SECTION (Relative z-20 to sit on top of doodles) */}
+      {/* 1. HERO TEXT SECTION */}
       <div className="container mx-auto px-4 relative z-20 text-center mb-4 md:mb-8">
         <motion.div
            initial={{ opacity: 0, y: 20 }}
            animate={{ opacity: 1, y: 0 }}
            transition={{ duration: 0.6 }}
         >
-          
           {/* Main Headline */}
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-display mt-10 font-bold text-gray-900 leading-[1.1] mb-6 tracking-tight">
             Donate Blood, <br className="hidden md:block" />
@@ -53,10 +72,10 @@ export function Hero() {
           </p>
         </motion.div>
       </div>
-       <div className="flex justify-center w-full mt-8 relative z-30"> 
+
+      <div className="flex justify-center w-full mt-8 relative z-30"> 
         <Button 
           size="lg" 
-          // INCREASED SIZE: h-14, px-10, text-lg
           className="bg-red-600 text-white hover:bg-red-700 h-14 px-10 text-lg font-semibold shadow-xl shadow-red-200 whitespace-nowrap"
           onClick={() => setLocation("/register")}
         >
@@ -64,8 +83,8 @@ export function Hero() {
         </Button>
       </div>
    
-      {/* 2. STATS VISUALIZATION Section (Relative z-10 to sit on top) */}
-   <div className="relative z-10 w-full max-w-[1400px] mx-auto h-[350px] md:h-[450px] flex justify-center items-center mt-25">
+      {/* 2. STATS VISUALIZATION Section */}
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto h-[350px] md:h-[450px] flex justify-center items-center mt-25">
         
         {/* --- LAYER B: The Two Logos (Left & Right) --- */}
         <div className="absolute inset-0 w-full flex items-center justify-between px-[5%] md:px-[10%] lg:px-[18%] z-10 pointer-events-none">
@@ -118,13 +137,17 @@ export function Hero() {
 
             <div className="flex flex-col items-center">
               <span className="text-7xl md:text-8xl font-display font-bold text-gray-900 leading-none tracking-tighter">
-                <span className="text-red-600 drop-shadow-sm">125</span>
+                {loading ? (
+                  <span className="text-red-200 animate-pulse">...</span>
+                ) : (
+                  <span className="text-red-600 drop-shadow-sm">{donorCount}</span>
+                )}
               </span>
               
               {/* Trend Pill */}
               <span className="mt-4 flex items-center gap-1.5 bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-bold shadow-sm border border-green-100 bg-white">
                 <TrendingUp className="w-4 h-4" /> 
-                <span>+12% this week</span>
+                <span>Growing Daily</span>
               </span>
             </div>
             

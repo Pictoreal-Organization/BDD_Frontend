@@ -7,7 +7,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import Register from "@/pages/Register";
-import Login from "@/pages/Login";
 import DonorDashboard from "@/pages/DonorDashboard";
 import Profile from "@/pages/Profile";
 import DonationHistory from "@/pages/DonationHistory";
@@ -20,7 +19,6 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
-      <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/donor-dashboard" component={DonorDashboard} />
       <Route path="/profile" component={Profile} />

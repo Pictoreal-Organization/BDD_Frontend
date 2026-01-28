@@ -1,27 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, 
   Droplet, 
-  ChevronLeft, 
   CheckCircle2, 
-  XCircle, 
-  Printer, 
   ArrowRight,
-  UserCheck,
   Phone,
   Calendar,
   AlertCircle,
   Clock,
-  Heart,
   Bell,
-  LogOut
+  LogOut,
+  Loader2,
+  Printer,
+  UserCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -42,54 +39,199 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
 
+// Interface matching Backend Search Response
 interface Donor {
   id: string;
   name: string;
+  email: string;
+  phoneNumber: string;
+  rollNumber: string; // mapped from roll_number
   bloodGroup: string;
-  regNumber: string;
-  category: string;
-  phone: string;
-  lastDonation: string;
-  eligible: boolean;
+  age: number;
+  year: string;
+  branch: string;
+  weight: number;
+  status: string;
+  approvedAt: string;
+  registeredAt: string;
 }
-
-
 
 export default function Verification() {
   const [, setLocation] = useLocation();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDonor, setSelectedDonor] = useState<Donor | null>(null);
-  const [approvedDonors, setApprovedDonors] = useState<Donor[]>([]);
+  const { toast } = useToast();
   
+  // Data States
+  const [searchQuery, setSearchQuery] = useState("");
+  const [donors, setDonors] = useState<Donor[]>([]);
+  const [selectedDonor, setSelectedDonor] = useState<Donor | null>(null);
+  const [todayCount, setTodayCount] = useState(0);
+  
+  // Loading States
+  const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+
   // Modal States
   const [step, setStep] = useState<number>(0); // 0: None, 1: Identity, 2: Completion, 3: Success, 4: Unable
+  
+  // Form States
   const [collectedSuccess, setCollectedSuccess] = useState<string>("yes");
   const [units, setUnits] = useState<string>("1");
+  const [rejectionReason, setRejectionReason] = useState("");
 
-  const openVerification = (donor: Donor) => {
-    setSelectedDonor(donor);
-    setStep(1);
-  };
+  // --- API CALLS ---
 
+  // 1. Fetch Today's Count
+  const fetchTodayCount = useCallback(async () => {
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
+      const response = await fetch(`${API_BASE}/verify/count`);
+      if (response.ok) {
+        const data = await response.json();
+        setTodayCount(data.count);
+      }
+    } catch (error) {
+      console.error("Error fetching count:", error);
+    }
+  }, []);
+
+  // 2. Search Donors (Debounced or on Effect)
   useEffect(() => {
-   const stored = JSON.parse(localStorage.getItem("approvedDonors") || "[]");
-   setApprovedDonors(stored);
-   }, []);
+    const fetchDonors = async () => {
+      setLoading(true);
+      try {
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
+        const params = new URLSearchParams({ query: searchQuery });
+        const response = await fetch(`${API_BASE}/verify/search?${params.toString()}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setDonors(data.donors);
+        }
+      } catch (error) {
+        console.error("Error searching donors:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleComplete = () => {
-    if (collectedSuccess === "yes") {
+    const timeoutId = setTimeout(() => {
+      fetchDonors();
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  // Initial Load
+  useEffect(() => {
+    fetchTodayCount();
+  }, [fetchTodayCount]);
+
+
+  // 3. Complete Donation Action
+  const handleComplete = async () => {
+    if (!selectedDonor) return;
+
+    if (collectedSuccess === "no") {
+      setStep(4); // Move to rejection flow
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
+      
+      const response = await fetch(`${API_BASE}/verify/complete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ donorId: selectedDonor.id })
+      });
+
+      if (!response.ok) throw new Error("Failed to complete donation");
+
+      // Success UI
       setStep(3);
+      fetchTodayCount(); // Refresh stats
       confetti({
         particleCount: 150,
         spread: 70,
         origin: { y: 0.6 },
         colors: ["#DC2626", "#FCA5A5", "#FFFFFF"]
       });
-    } else {
-      setStep(4);
+
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not mark donation as completed.",
+      });
+    } finally {
+      setActionLoading(false);
     }
+  };
+
+  // 4. Reject/Unable to Donate Action
+  const handleRejection = async () => {
+    if (!selectedDonor) return;
+
+    setActionLoading(true);
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
+      
+      // We use the status update endpoint to move them to 'rejected'
+      const response = await fetch(`${API_BASE}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          donorIds: [selectedDonor.id],
+          status: "rejected"
+        })
+      });
+
+      if (!response.ok) throw new Error("Failed to update status");
+
+      toast({
+        title: "Status Updated",
+        description: "Donor marked as unable to donate.",
+      });
+      reset();
+      
+      // Refresh list to remove the rejected donor
+      setDonors(prev => prev.filter(d => d.id !== selectedDonor.id));
+
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not update donor status.",
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDownloadCertificate = () => {
+    if (!selectedDonor) return;
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
+    // Open the certificate URL in a new tab
+    window.open(`${API_BASE}/certificate/${selectedDonor.rollNumber}`, '_blank');
+  };
+
+  const handleLogout = async () => {
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
+      await fetch(`${API_BASE}/logout`);
+      setLocation("/login");
+    } catch (e) {
+      setLocation("/login");
+    }
+  };
+
+  const openVerification = (donor: Donor) => {
+    setSelectedDonor(donor);
+    setStep(1);
   };
 
   const reset = () => {
@@ -97,6 +239,9 @@ export default function Verification() {
     setSelectedDonor(null);
     setCollectedSuccess("yes");
     setUnits("1");
+    setRejectionReason("");
+    // Refresh list
+    setSearchQuery(prev => prev + " "); // Trigger small re-fetch hack or call fetchDonors()
   };
 
   return (
@@ -104,7 +249,7 @@ export default function Verification() {
       {/* Top Header */}
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-display font-bold text-xl text-red-600">
+          <div className="flex items-center gap-2 font-display font-bold text-xl text-red-600 cursor-pointer" onClick={() => setLocation("/")}>
             <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white">
               <Droplet className="w-5 h-5 fill-current" />
             </div>
@@ -134,12 +279,11 @@ export default function Verification() {
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="hidden sm:inline-block text-sm font-medium">Welcome, Admin Kumar! 👋</span>
+            <span className="hidden sm:inline-block text-sm font-medium">Welcome, Admin! 👋</span>
             <Button variant="ghost" size="icon" className="relative text-gray-400">
               <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => setLocation("/login")} className="text-muted-foreground">
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground">
               <LogOut className="w-4 h-4 mr-2" /> Logout
             </Button>
           </div>
@@ -152,14 +296,14 @@ export default function Verification() {
           <div className="relative flex-1">
             <Search className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
             <Input 
-              placeholder="Search Approved Donor (Name, Mobile, or Reg Number)..." 
+              placeholder="Search Approved Donor (Name, Mobile, or Roll No)..." 
               className="pl-12 h-14 text-lg rounded-2xl border-gray-200 shadow-sm bg-white"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <Button className="h-14 w-14 rounded-2xl bg-red-600 hover:bg-red-700 shadow-lg">
-            <Search className="w-6 h-6" />
+            {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Search className="w-6 h-6" />}
           </Button>
         </div>
 
@@ -167,50 +311,62 @@ export default function Verification() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-display font-bold text-gray-800 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-gray-400" /> Approved Donors Today ({approvedDonors.length})
+              <Clock className="w-5 h-5 text-gray-400" /> Completed Today ({todayCount})
             </h2>
+            <div className="text-sm text-gray-500">
+              Found {donors.length} eligible donors
+            </div>
           </div>
 
           <div className="grid gap-4">
-            {approvedDonors.filter(d => d.name.toLowerCase().includes(searchQuery.toLowerCase())).map((donor) => (
-              <motion.div key={donor.id} layout>
-                <Card className="border-none shadow-md hover:shadow-lg transition-all bg-white overflow-hidden">
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900">{donor.name}</h3>
-                        <p className="text-sm text-muted-foreground font-medium">
-                          {donor.regNumber} • {donor.category}
-                        </p>
+            {loading ? (
+               <div className="text-center py-10 text-gray-400">Searching...</div>
+            ) : donors.length > 0 ? (
+              donors.map((donor) => (
+                <motion.div key={donor.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                  <Card className="border-none shadow-md hover:shadow-lg transition-all bg-white overflow-hidden">
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900">{donor.name}</h3>
+                          <p className="text-sm text-muted-foreground font-medium">
+                            {donor.rollNumber || "External"} • {donor.year || "N/A"} • {donor.branch || "N/A"}
+                          </p>
+                        </div>
+                        <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-600 font-black text-lg border border-red-100">
+                          {donor.bloodGroup}
+                        </div>
                       </div>
-                      <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-600 font-black text-lg border border-red-100">
-                        {donor.bloodGroup}
+                      
+                      <div className="flex flex-wrap gap-6 mb-6">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Phone className="w-4 h-4 text-gray-400" />
+                          {donor.phoneNumber}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Calendar className="w-4 h-4 text-gray-400" />
+                          Approved: <span className="text-emerald-600 font-bold">
+                             {new Date(donor.approvedAt || Date.now()).toLocaleDateString()}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-6 mb-6">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Phone className="w-4 h-4 text-gray-400" />
-                        {donor.phone}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Calendar className="w-4 h-4 text-gray-400" />
-                        Last: <span className={cn(donor.lastDonation === "Never" ? "text-gray-400" : "text-emerald-600 font-bold")}>
-                          {donor.lastDonation} {donor.eligible && " (✅ Eligible)"}
-                        </span>
-                      </div>
-                    </div>
 
-                    <Button 
-                      className="w-full h-12 bg-red-600 hover:bg-red-700 font-bold rounded-xl shadow-md group"
-                      onClick={() => openVerification(donor)}
-                    >
-                      Verify & Start Process <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+                      <Button 
+                        className="w-full h-12 bg-red-600 hover:bg-red-700 font-bold rounded-xl shadow-md group"
+                        onClick={() => openVerification(donor)}
+                      >
+                        Verify & Start Process <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))
+            ) : (
+              <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-gray-300">
+                <p className="text-gray-500">No approved donors found matching "{searchQuery}"</p>
+                <p className="text-sm text-gray-400 mt-1">Make sure the registration is approved in the dashboard first.</p>
+              </div>
+            )}
           </div>
         </div>
       </main>
@@ -232,15 +388,15 @@ export default function Verification() {
                 <span className="font-bold text-red-600">{selectedDonor?.bloodGroup}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-xs text-muted-foreground uppercase">Reg Number</span>
-                <span className="font-bold">{selectedDonor?.regNumber}</span>
+                <span className="text-xs text-muted-foreground uppercase">ID / Roll No</span>
+                <span className="font-bold">{selectedDonor?.rollNumber || "N/A"}</span>
               </div>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center space-x-3 bg-white border p-3 rounded-lg">
                 <Checkbox id="id-verified" />
-                <Label htmlFor="id-verified" className="text-sm font-medium">ID verified (Aadhar/College ID)</Label>
+                <Label htmlFor="id-verified" className="text-sm font-medium">ID verified (College ID / Aadhar)</Label>
               </div>
               <div className="flex items-center space-x-3 bg-white border p-3 rounded-lg">
                 <Checkbox id="ready" />
@@ -288,11 +444,11 @@ export default function Verification() {
                   <RadioGroup value={units} onValueChange={setUnits} className="grid grid-cols-2 gap-3">
                     <div className="flex items-center space-x-2 border p-3 rounded-lg cursor-pointer hover:bg-gray-50">
                       <RadioGroupItem value="1" id="u1" />
-                      <Label htmlFor="u1" className="text-sm cursor-pointer">1 unit (350ml) - Standard</Label>
+                      <Label htmlFor="u1" className="text-sm cursor-pointer">1 unit (350ml)</Label>
                     </div>
                     <div className="flex items-center space-x-2 border p-3 rounded-lg cursor-pointer hover:bg-gray-50">
                       <RadioGroupItem value="2" id="u2" />
-                      <Label htmlFor="u2" className="text-sm cursor-pointer">2 units (450ml) - Double</Label>
+                      <Label htmlFor="u2" className="text-sm cursor-pointer">2 units (450ml)</Label>
                     </div>
                   </RadioGroup>
                 </div>
@@ -302,12 +458,8 @@ export default function Verification() {
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
-                    <Checkbox id="thank-you" defaultChecked />
-                    <Label htmlFor="thank-you" className="text-sm font-normal">Send thank you email</Label>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Checkbox id="update-dash" defaultChecked />
-                    <Label htmlFor="update-dash" className="text-sm font-normal">Update public dashboard</Label>
+                    <Checkbox id="update-dash" defaultChecked disabled />
+                    <Label htmlFor="update-dash" className="text-sm font-normal">Update blood inventory automatically</Label>
                   </div>
                 </div>
               </motion.div>
@@ -315,8 +467,8 @@ export default function Verification() {
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="ghost" onClick={reset}>Cancel</Button>
-            <Button className="bg-red-600 hover:bg-red-700 px-8 font-bold" onClick={handleComplete}>
-              {collectedSuccess === "yes" ? "Complete Donation" : "Next"}
+            <Button className="bg-red-600 hover:bg-red-700 px-8 font-bold" onClick={handleComplete} disabled={actionLoading}>
+              {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (collectedSuccess === "yes" ? "Complete Donation" : "Next")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -334,7 +486,7 @@ export default function Verification() {
           <div className="py-4 space-y-4">
             <div className="space-y-2">
               <Label>Reason for Failure</Label>
-              <Select>
+              <Select value={rejectionReason} onValueChange={setRejectionReason}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a reason" />
                 </SelectTrigger>
@@ -352,15 +504,11 @@ export default function Verification() {
               <Label>Details</Label>
               <Textarea placeholder="Explain the situation..." />
             </div>
-            <div className="space-y-2">
-              <Label>Next Eligible Date</Label>
-              <Input type="date" />
-            </div>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="ghost" onClick={reset}>Cancel</Button>
-            <Button className="bg-gray-900 hover:bg-black text-white px-8 font-bold" onClick={reset}>
-              Save & Close
+            <Button className="bg-gray-900 hover:bg-black text-white px-8 font-bold" onClick={handleRejection} disabled={actionLoading}>
+              {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save & Close"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -386,21 +534,17 @@ export default function Verification() {
               </h4>
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium">Total Donations Today</span>
-                <span className="text-lg font-bold text-red-600">31</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">{selectedDonor?.bloodGroup} Donations</span>
-                <span className="text-lg font-bold text-red-600">8</span>
+                <span className="text-lg font-bold text-red-600">{todayCount}</span>
               </div>
             </div>
 
             <div className="flex items-center justify-center gap-2 text-emerald-600 text-sm font-medium bg-emerald-50 py-2 px-4 rounded-full">
               <AlertCircle className="w-4 h-4" />
-              Toast notification sent to public dashboard!
+              Inventory Updated Automatically
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-4">
-              <Button variant="outline" className="h-12 border-gray-200">
+              <Button variant="outline" className="h-12 border-gray-200" onClick={handleDownloadCertificate}>
                 <Printer className="w-4 h-4 mr-2" /> Print Certificate
               </Button>
               <Button className="bg-red-600 hover:bg-red-700 h-12 font-bold shadow-lg" onClick={reset}>

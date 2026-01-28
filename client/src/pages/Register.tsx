@@ -12,7 +12,10 @@ import {
   ChevronRight, 
   ChevronLeft, 
   Info, 
-  Check
+  Check,
+  Building2,
+  Calendar,
+  Loader2
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -43,25 +46,38 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast"; // Assuming you have this, otherwise remove toast calls
 
+// Schema matching your Backend Validation
 const formSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
   email: z.string().email("Invalid email address"),
   mobile: z.string().min(10, "Valid mobile number is required"),
   category: z.string().min(1, "Please select a category"),
-  rollNo: z.string().regex(/^\d{5}$/, "Roll No. must be exactly 5 digits").optional(),
+  branch: z.string().min(1, "Please select a branch"), // Backend Requirement
+  year: z.string().optional(), // Backend Requirement (for students)
+  rollNo: z.string().optional(), // Extra field
   age: z.coerce.number().min(18, "Minimum age is 18").max(65, "Maximum age is 65"),
   weight: z.coerce.number().min(45, "Minimum weight is 45kg"),
   bloodGroup: z.string().min(1, "Select blood group"),
-  username: z.string().min(3, "Username must be at least 3 characters"),
   agreeTerms: z.boolean().refine(v => v === true, "You must agree to terms"),
   certifyInfo: z.boolean().refine(v => v === true, "You must certify your info"),
+}).refine((data) => {
+  if (data.category === "Student" && !data.year) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Year is required for students",
+  path: ["year"],
 });
 
 export default function Register() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -86,8 +102,8 @@ export default function Register() {
   const nextStep = async () => {
     let fieldsToValidate: any[] = [];
     if (step === 1) {
-      fieldsToValidate = ["fullName", "email", "mobile", "category"];
-      if (category === "Student") fieldsToValidate.push("rollNo");
+      fieldsToValidate = ["fullName", "email", "mobile", "category", "branch"];
+      if (category === "Student") fieldsToValidate.push("year");
     } else if (step === 2) {
       fieldsToValidate = ["age", "weight", "bloodGroup"];
     }
@@ -98,15 +114,60 @@ export default function Register() {
 
   const prevStep = () => setStep(step - 1);
 
-  const onSubmit = (data: any) => {
-    console.log("Form submitted:", data);
-    setIsSuccessModalOpen(true);
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    setIsSubmitting(true);
+    try {
+      // 1. Prepare Payload according to backend newDonor controller
+      const payload = {
+        name: data.fullName,
+        phoneNumber: data.mobile,
+        email: data.email,
+        branch: data.branch,
+        // For non-students, map category to year to satisfy backend validation
+        year: data.category === "Student" ? data.year : data.category, 
+        age: data.age,
+        bloodGroup: data.bloodGroup,
+        weight: data.weight,
+        // rollNo is optional, backend might use it if schema allows extras, 
+        // otherwise it's just frontend data.
+      };
+
+      // 2. Send Request
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
+      
+      const response = await fetch(`${API_URL}`, { // POST to /api/donate (which maps to /)
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Registration failed");
+      }
+
+      // 3. Success
+      setIsSuccessModalOpen(true);
+
+    } catch (error: any) {
+      console.error("Registration Error:", error);
+      toast({
+        variant: "destructive",
+        title: "Registration Failed",
+        description: error.message || "Something went wrong. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const steps = [
     { id: 1, name: "Personal" },
     { id: 2, name: "Medical" },
-    { id: 3, name: "Account" },
+    { id: 3, name: "Confirm" },
   ];
 
   return (
@@ -144,9 +205,9 @@ export default function Register() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardHeader className="space-y-1 bg-gray-50/50 rounded-t-xl border-b border-gray-100">
             <CardTitle className="text-2xl font-display font-bold text-gray-800">
-              {step === 1 && "Step 1: Personal Information"}
-              {step === 2 && "Step 2: Medical Details"}
-              {step === 3 && "Step 3: Create Your Account"}
+              {step === 1 && "Step 1: Personal Details"}
+              {step === 2 && "Step 2: Medical Check"}
+              {step === 3 && "Step 3: Review & Submit"}
             </CardTitle>
             <CardDescription>
               Register as Blood Donor - Step {step} of 3
@@ -163,6 +224,7 @@ export default function Register() {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-4"
                 >
+                  {/* FULL NAME */}
                   <div className="space-y-2">
                     <Label htmlFor="fullName">Full Name</Label>
                     <div className="relative">
@@ -180,6 +242,7 @@ export default function Register() {
                     {errors.fullName && <p className="text-xs text-red-500">{errors.fullName.message}</p>}
                   </div>
 
+                  {/* EMAIL */}
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <div className="relative">
@@ -195,6 +258,7 @@ export default function Register() {
                     {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
                   </div>
 
+                  {/* MOBILE */}
                   <div className="space-y-2">
                     <Label htmlFor="mobile">Mobile Number</Label>
                     <div className="relative">
@@ -209,12 +273,13 @@ export default function Register() {
                     {errors.mobile && <p className="text-xs text-red-500">{errors.mobile.message}</p>}
                   </div>
 
+                  {/* BRANCH & CATEGORY ROW */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="category">Category</Label>
                       <Select onValueChange={(v) => setValue("category", v)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select Category" />
+                          <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Student">Student</SelectItem>
@@ -226,18 +291,55 @@ export default function Register() {
                       {errors.category && <p className="text-xs text-red-500">{errors.category.message}</p>}
                     </div>
 
-                    {category === "Student" && (
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="space-y-2"
-                      >
-                        <Label htmlFor="rollNo">Roll No.</Label>
-                        <Input id="rollNo" placeholder="12345" {...register("rollNo")} />
-                        {errors.rollNo && <p className="text-xs text-red-500">{errors.rollNo.message}</p>}
-                      </motion.div>
-                    )}
+                    <div className="space-y-2">
+                      <Label htmlFor="branch">Branch</Label>
+                      <Select onValueChange={(v) => setValue("branch", v)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Branch" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Computer">Computer (CE)</SelectItem>
+                          <SelectItem value="IT">IT</SelectItem>
+                          <SelectItem value="EnTC">EnTC</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {errors.branch && <p className="text-xs text-red-500">{errors.branch.message}</p>}
+                    </div>
                   </div>
+
+                  {/* YEAR (Conditional for Students) */}
+                  {category === "Student" && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="grid grid-cols-2 gap-4"
+                    >
+                       <div className="space-y-2">
+                        <Label htmlFor="year">Academic Year</Label>
+                        <Select onValueChange={(v) => setValue("year", v)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Year" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="FE">FE (First Year)</SelectItem>
+                            <SelectItem value="SE">SE (Second Year)</SelectItem>
+                            <SelectItem value="TE">TE (Third Year)</SelectItem>
+                            <SelectItem value="BE">BE (Final Year)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {errors.year && <p className="text-xs text-red-500">{errors.year.message}</p>}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="rollNo">Roll No (Optional)</Label>
+                        <div className="relative">
+                          <Building2 className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                          <Input id="rollNo" className="pl-10" placeholder="e.g. 31456" {...register("rollNo")} />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
                 </motion.div>
               )}
 
@@ -254,14 +356,14 @@ export default function Register() {
                       <Label htmlFor="age">Age</Label>
                       <Input id="age" type="number" {...register("age")} />
                       {age && (age < 18 || age > 65) && (
-                        <p className="text-xs text-red-500 font-medium">Ineligible: Must be 18-65 years</p>
+                        <p className="text-xs text-red-500 font-medium">Ineligible: Must be 18-65</p>
                       )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="weight">Weight (kg)</Label>
                       <Input id="weight" type="number" {...register("weight")} />
                       {weight && weight < 45 && (
-                        <p className="text-xs text-red-500 font-medium">Ineligible: Minimum weight 45kg</p>
+                        <p className="text-xs text-red-500 font-medium">Ineligible: Min 45kg</p>
                       )}
                     </div>
                   </div>
@@ -301,30 +403,42 @@ export default function Register() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="space-y-4"
+                  className="space-y-6"
                 >
-                  <div className="space-y-2">
-                    <Label htmlFor="username">Username</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-                      <Input id="username" className="pl-10" placeholder="Unique username" {...register("username")} />
+                  {/* Summary Card */}
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 space-y-2 text-sm">
+                    <h4 className="font-semibold text-gray-900 mb-2">Review Details</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      <span className="text-gray-500">Name:</span>
+                      <span className="font-medium">{watch("fullName")}</span>
+                      
+                      <span className="text-gray-500">Contact:</span>
+                      <span className="font-medium">{watch("mobile")}</span>
+                      
+                      <span className="text-gray-500">Details:</span>
+                      <span className="font-medium">{watch("branch")} ({watch("category")})</span>
+                      
+                      <span className="text-gray-500">Medical:</span>
+                      <span className="font-medium">{watch("bloodGroup")}, {watch("weight")}kg</span>
                     </div>
-                    {errors.username && <p className="text-xs text-red-500">{errors.username.message}</p>}
                   </div>
 
-                  <div className="space-y-4 pt-4">
+                  <div className="space-y-4 pt-2">
                     <div className="flex items-start space-x-2">
                       <Checkbox id="terms" onCheckedChange={(v) => setValue("agreeTerms", !!v)} />
                       <Label htmlFor="terms" className="text-sm font-normal leading-tight">
-                        I agree to the <span className="text-red-600 hover:underline cursor-pointer font-medium">terms and conditions</span>
+                        I agree to the <span className="text-red-600 hover:underline cursor-pointer font-medium">terms and conditions</span> of the blood donation drive.
                       </Label>
                     </div>
+                    {errors.agreeTerms && <p className="text-xs text-red-500 ml-6">{errors.agreeTerms.message}</p>}
+
                     <div className="flex items-start space-x-2">
                       <Checkbox id="certify" onCheckedChange={(v) => setValue("certifyInfo", !!v)} />
                       <Label htmlFor="certify" className="text-sm font-normal leading-tight">
                         I certify that all information provided is accurate and truthful.
                       </Label>
                     </div>
+                    {errors.certifyInfo && <p className="text-xs text-red-500 ml-6">{errors.certifyInfo.message}</p>}
                   </div>
                 </motion.div>
               )}
@@ -337,7 +451,7 @@ export default function Register() {
                 Cancel
               </Button>
             ) : (
-              <Button type="button" variant="outline" onClick={prevStep}>
+              <Button type="button" variant="outline" onClick={prevStep} disabled={isSubmitting}>
                 <ChevronLeft className="w-4 h-4 mr-2" /> Back
               </Button>
             )}
@@ -350,9 +464,15 @@ export default function Register() {
               <Button 
                 type="submit" 
                 className="bg-red-600 hover:bg-red-700 px-8"
-                disabled={!isValid}
+                disabled={!isValid || isSubmitting}
               >
-                Complete Registration
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...
+                  </>
+                ) : (
+                  "Complete Registration"
+                )}
               </Button>
             )}
           </CardFooter>
@@ -367,7 +487,7 @@ export default function Register() {
             </div>
             <DialogTitle className="text-2xl font-bold text-gray-900">Registration Successful!</DialogTitle>
             <DialogDescription className="text-lg pt-4">
-              Thank you for registering! Your registration is pending review by our admin team.
+              Thank you for registering! Your application has been submitted and is pending review by our team.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-center mt-6">
