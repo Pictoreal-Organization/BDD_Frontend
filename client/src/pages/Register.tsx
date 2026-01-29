@@ -14,7 +14,6 @@ import {
   Info, 
   Check,
   Building2,
-  Calendar,
   Loader2
 } from "lucide-react";
 
@@ -46,7 +45,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast"; // Assuming you have this, otherwise remove toast calls
+import { useToast } from "@/hooks/use-toast";
 
 // Schema matching your Backend Validation
 const formSchema = z.object({
@@ -54,9 +53,9 @@ const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   mobile: z.string().min(10, "Valid mobile number is required"),
   category: z.string().min(1, "Please select a category"),
-  branch: z.string().min(1, "Please select a branch"), // Backend Requirement
-  year: z.string().optional(), // Backend Requirement (for students)
-  rollNo: z.string().optional(), // Extra field
+  branch: z.string().min(1, "Please select a branch"),
+  year: z.string().optional(),
+  rollNo: z.string().optional(),
   age: z.coerce.number().min(18, "Minimum age is 18").max(65, "Maximum age is 65"),
   weight: z.coerce.number().min(45, "Minimum weight is 45kg"),
   bloodGroup: z.string().min(1, "Select blood group"),
@@ -117,25 +116,21 @@ export default function Register() {
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
-      // 1. Prepare Payload according to backend newDonor controller
       const payload = {
         name: data.fullName,
         phoneNumber: data.mobile,
         email: data.email,
         branch: data.branch,
-        // For non-students, map category to year to satisfy backend validation
         year: data.category === "Student" ? data.year : data.category, 
         age: data.age,
         bloodGroup: data.bloodGroup,
         weight: data.weight,
-        // rollNo is optional, backend might use it if schema allows extras, 
-        // otherwise it's just frontend data.
+        rollNo: data.rollNo // Included just in case backend uses it later
       };
 
-      // 2. Send Request
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
       
-      const response = await fetch(`${API_URL}`, { // POST to /api/donate (which maps to /)
+      const response = await fetch(`${API_URL}`, { 
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -149,7 +144,6 @@ export default function Register() {
         throw new Error(result.error || "Registration failed");
       }
 
-      // 3. Success
       setIsSuccessModalOpen(true);
 
     } catch (error: any) {
@@ -164,12 +158,6 @@ export default function Register() {
     }
   };
 
-  const steps = [
-    { id: 1, name: "Personal" },
-    { id: 2, name: "Medical" },
-    { id: 3, name: "Confirm" },
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-12 px-4">
       {/* Progress Indicator */}
@@ -178,23 +166,23 @@ export default function Register() {
           <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 -translate-y-1/2 z-0" />
           <div 
             className="absolute top-1/2 left-0 h-0.5 bg-red-600 -translate-y-1/2 z-0 transition-all duration-500" 
-            style={{ width: `${((step - 1) / (steps.length - 1)) * 100}%` }}
+            style={{ width: `${((step - 1) / 2) * 100}%` }}
           />
-          {steps.map((s) => (
-            <div key={s.id} className="relative z-10 flex flex-col items-center">
+          {[1, 2, 3].map((s) => (
+            <div key={s} className="relative z-10 flex flex-col items-center">
               <div 
                 className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300",
-                  step >= s.id ? "bg-red-600 border-red-600 text-white" : "bg-white border-gray-200 text-gray-400"
+                  step >= s ? "bg-red-600 border-red-600 text-white" : "bg-white border-gray-200 text-gray-400"
                 )}
               >
-                {step > s.id ? <Check className="w-5 h-5" /> : s.id}
+                {step > s ? <Check className="w-5 h-5" /> : s}
               </div>
               <span className={cn(
                 "mt-2 text-xs font-medium uppercase tracking-wider",
-                step >= s.id ? "text-red-600" : "text-gray-400"
+                step >= s ? "text-red-600" : "text-gray-400"
               )}>
-                {s.name}
+                {s === 1 ? "Personal" : s === 2 ? "Medical" : "Confirm"}
               </span>
             </div>
           ))}
@@ -277,7 +265,7 @@ export default function Register() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="category">Category</Label>
-                      <Select onValueChange={(v) => setValue("category", v)}>
+                      <Select onValueChange={(v) => setValue("category", v, { shouldValidate: true })}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select" />
                         </SelectTrigger>
@@ -293,7 +281,7 @@ export default function Register() {
 
                     <div className="space-y-2">
                       <Label htmlFor="branch">Branch</Label>
-                      <Select onValueChange={(v) => setValue("branch", v)}>
+                      <Select onValueChange={(v) => setValue("branch", v, { shouldValidate: true })}>
                         <SelectTrigger>
                           <SelectValue placeholder="Branch" />
                         </SelectTrigger>
@@ -317,7 +305,7 @@ export default function Register() {
                     >
                        <div className="space-y-2">
                         <Label htmlFor="year">Academic Year</Label>
-                        <Select onValueChange={(v) => setValue("year", v)}>
+                        <Select onValueChange={(v) => setValue("year", v, { shouldValidate: true })}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Year" />
                           </SelectTrigger>
@@ -370,7 +358,7 @@ export default function Register() {
 
                   <div className="space-y-2">
                     <Label htmlFor="bloodGroup">Blood Group</Label>
-                    <Select onValueChange={(v) => setValue("bloodGroup", v)}>
+                    <Select onValueChange={(v) => setValue("bloodGroup", v, { shouldValidate: true })}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select Blood Group" />
                       </SelectTrigger>
@@ -425,7 +413,11 @@ export default function Register() {
 
                   <div className="space-y-4 pt-2">
                     <div className="flex items-start space-x-2">
-                      <Checkbox id="terms" onCheckedChange={(v) => setValue("agreeTerms", !!v)} />
+                      {/* FIX APPLIED HERE: Added { shouldValidate: true } */}
+                      <Checkbox 
+                        id="terms" 
+                        onCheckedChange={(v) => setValue("agreeTerms", !!v, { shouldValidate: true })} 
+                      />
                       <Label htmlFor="terms" className="text-sm font-normal leading-tight">
                         I agree to the <span className="text-red-600 hover:underline cursor-pointer font-medium">terms and conditions</span> of the blood donation drive.
                       </Label>
@@ -433,7 +425,11 @@ export default function Register() {
                     {errors.agreeTerms && <p className="text-xs text-red-500 ml-6">{errors.agreeTerms.message}</p>}
 
                     <div className="flex items-start space-x-2">
-                      <Checkbox id="certify" onCheckedChange={(v) => setValue("certifyInfo", !!v)} />
+                      {/* FIX APPLIED HERE: Added { shouldValidate: true } */}
+                      <Checkbox 
+                        id="certify" 
+                        onCheckedChange={(v) => setValue("certifyInfo", !!v, { shouldValidate: true })} 
+                      />
                       <Label htmlFor="certify" className="text-sm font-normal leading-tight">
                         I certify that all information provided is accurate and truthful.
                       </Label>
