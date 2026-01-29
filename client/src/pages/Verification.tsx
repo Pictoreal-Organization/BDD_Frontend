@@ -297,7 +297,7 @@ export default function Verification() {
             <Search className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
             <Input 
               placeholder="Search Approved Donor (Name, Mobile, or Roll No)..." 
-              placeholder="Search Approved Donor (Name, Mobile, or Roll No)..." 
+              // placeholder="Search Approved Donor (Name, Mobile, or Roll No)..." 
               className="pl-12 h-14 text-lg rounded-2xl border-gray-200 shadow-sm bg-white"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

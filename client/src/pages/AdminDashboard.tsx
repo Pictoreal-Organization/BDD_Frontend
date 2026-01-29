@@ -14,7 +14,10 @@ import {
   ShieldCheck,
   UserPlus,
   ArrowRight,
-  Loader2
+  Loader2,
+  Download,
+  Table,
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -202,12 +205,6 @@ export default function AdminDashboard() {
 
           <div className="flex items-center gap-4">
             <span className="hidden sm:inline-block text-sm font-medium">Welcome, Admin! 👋</span>
-            <Button variant="ghost" size="icon" className="relative text-gray-400">
-              <Bell className="w-5 h-5" />
-              {stats.pending > 0 && (
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
-              )}
-            </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground">
               <LogOut className="w-4 h-4 mr-2" /> Logout
             </Button>
@@ -292,94 +289,29 @@ export default function AdminDashboard() {
 
               {/* Sidebar Area */}
               <div className="space-y-8">
-                {/* Recent Activity */}
+                {/* Export Options */}
                 <Card className="border-none shadow-xl bg-white overflow-hidden">
                   <CardHeader className="border-b border-gray-50">
                     <CardTitle className="text-lg font-display font-bold flex items-center gap-2">
-                      <Bell className="w-5 h-5 text-red-600" /> Recent Activity
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="space-y-6">
-                      {activity.length > 0 ? (
-                        activity.map((item, i) => (
-                          <div key={item.id || i} className="flex gap-4">
-                            <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", item.bg, item.color)}>
-                              <item.icon className="w-5 h-5" />
-                            </div>
-                            <div className="space-y-1">
-                              <p className="text-sm font-medium text-gray-900 leading-tight">
-                                <span className="font-bold">{item.user}</span> <span className="opacity-80">{item.action}</span>
-                              </p>
-                              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Clock className="w-3 h-3" /> {item.time}
-                              </p>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-center text-sm text-gray-400 py-4">No recent activity</div>
-                      )}
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      className="w-full mt-6 text-red-600 hover:text-red-700 hover:bg-red-50 text-sm font-bold"
-                      onClick={() => setLocation("/admin/registrations")}
-                    >
-                      View All Activity <ChevronRight className="w-4 h-4 ml-1" />
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Action Required Alerts */}
-                <Card className="border-none shadow-xl bg-red-600 text-white overflow-hidden">
-                  <CardHeader className="border-b border-white/10">
-                    <CardTitle className="text-lg font-display font-bold flex items-center gap-2">
-                      <AlertCircle className="w-5 h-5" /> Action Required
+                      <Download className="w-5 h-5 text-red-600" /> Export Options
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6 space-y-4">
-                    <button 
-                      className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group"
-                      onClick={() => setLocation("/admin/registrations")}
-                    >
-                      <div className="space-y-1">
-                        <p className="text-sm font-bold">{stats.pending} Pending Registrations</p>
-                        <p className="text-xs text-red-100 opacity-80">Requires manual verification</p>
-                      </div>
-                      <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </button>
-                    
-                    <button 
-                      className="w-full flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left group"
-                      onClick={() => setLocation("/admin/verify")}
-                    >
-                      <div className="space-y-1">
-                        <p className="text-sm font-bold">{stats.approved} Ready to Donate</p>
-                        <p className="text-xs text-red-100 opacity-80">Approved & waiting for drive</p>
-                      </div>
-                      <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </button>
+                    <Button variant="outline" className="w-full h-20 flex-col gap-2 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all">
+                      <Table className="w-5 h-5" /> 
+                      <span className="font-bold text-sm">Export as CSV</span>
+                    </Button>
+                    <Button variant="outline" className="w-full h-20 flex-col gap-2 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all">
+                      <FileText className="w-5 h-5" /> 
+                      <span className="font-bold text-sm">Export as PDF</span>
+                    </Button>
+                    <Button variant="outline" className="w-full h-20 flex-col gap-2 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all">
+                      <BarChart3 className="w-5 h-5" /> 
+                      <span className="font-bold text-sm">Export as Excel</span>
+                    </Button>
                   </CardContent>
                 </Card>
               </div>
-            </div>
-
-            {/* Bottom Actions */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4 pb-12">
-              <Button 
-                className="h-14 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-lg font-bold shadow-xl flex-1 sm:flex-none"
-                onClick={() => setLocation("/admin/registrations")}
-              >
-                View Pending Registrations
-              </Button>
-              <Button 
-                variant="outline" 
-                className="h-14 px-8 rounded-2xl border-gray-200 text-lg font-bold hover:bg-gray-50 flex-1 sm:flex-none"
-                onClick={() => setLocation("/admin/verify")}
-              >
-                Start Verification Process
-              </Button>
             </div>
           </>
         )}
