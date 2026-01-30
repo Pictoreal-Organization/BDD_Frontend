@@ -10,11 +10,11 @@ import {
   Calendar,
   AlertCircle,
   Clock,
-  Bell,
   LogOut,
   Loader2,
   Printer,
-  UserCheck
+  UserCheck,
+  Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -244,6 +244,20 @@ export default function Verification() {
     setSearchQuery(prev => prev + " "); // Trigger small re-fetch hack or call fetchDonors()
   };
 
+  const getTimeAgo = (dateString: string): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (minutes < 1) return "Just now";
+    if (minutes < 60) return `${minutes} min${minutes > 1 ? 's' : ''} ago`;
+    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    return `${days} day${days > 1 ? 's' : ''} ago`;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Top Header */}
@@ -257,29 +271,26 @@ export default function Verification() {
             <span className="sm:hidden">Admin</span>
           </div>
           
-          <div className="flex-1 overflow-x-auto scrollbar-hide mx-4 lg:flex-initial lg:overflow-visible">
-            <div className="flex items-center justify-center gap-4 lg:gap-6 text-sm font-semibold text-muted-foreground whitespace-nowrap min-w-max lg:min-w-0">
+          <div className="absolute left-1/2 transform -translate-x-1/2">
+            <div className="flex items-center justify-center gap-4 lg:gap-6 text-sm font-semibold text-muted-foreground whitespace-nowrap">
               <button 
-                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-1"
+                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-4"
                 onClick={() => setLocation("/admin")}
               >
                 Dashboard
               </button>
               <button 
-                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-1"
+                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-4"
                 onClick={() => setLocation("/admin/registrations")}
               >
                 Registrations
               </button>
-              <button className="text-red-600 border-b-2 border-red-600 h-16 px-2 lg:px-1">Verify</button>
+              <button className="text-red-600 border-b-2 border-red-600 h-16 px-2 lg:px-4">Verify</button>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
             <span className="hidden sm:inline-block text-sm font-medium">Welcome, Admin! 👋</span>
-            <Button variant="ghost" size="icon" className="relative text-gray-400">
-              <Bell className="w-5 h-5" />
-            </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground">
               <LogOut className="w-4 h-4 mr-2" /> Logout
             </Button>
@@ -290,7 +301,7 @@ export default function Verification() {
         </div>
       </nav>
 
-      <main className="container mx-auto px-4 py-8 max-w-3xl space-y-8">
+      <main className="container mx-auto px-4 py-8 max-w-6xl space-y-8">
         {/* Search Bar */}
         <div className="flex gap-2">
           <div className="relative flex-1">
@@ -319,44 +330,87 @@ export default function Verification() {
             </div>
           </div>
 
-          <div className="grid gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading ? (
-               <div className="text-center py-10 text-gray-400">Searching...</div>
+               <div className="flex justify-center items-center py-20 col-span-full">
+                <Loader2 className="w-10 h-10 animate-spin text-red-600" />
+              </div>
             ) : donors.length > 0 ? (
               donors.map((donor) => (
-                <motion.div key={donor.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                  <Card className="border-none shadow-md hover:shadow-lg transition-all bg-white overflow-hidden">
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-xl font-bold text-gray-900">{donor.name}</h3>
-                          <p className="text-sm text-muted-foreground font-medium">
-                            {donor.rollNumber || "External"} • {donor.year || "N/A"} • {donor.branch || "N/A"}
-                          </p>
-                        </div>
-                        <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-600 font-black text-lg border border-red-100">
-                          {donor.bloodGroup}
+                <motion.div key={donor.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}>
+                  <Card className="border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+                    <CardContent className="p-6 flex flex-col h-full">
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-red-600 font-bold text-xl shrink-0">
+                            {donor.bloodGroup}
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-display font-bold text-gray-900 line-clamp-1" title={donor.name}>{donor.name}</h3>
+                            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                              <span>{donor.age} Yrs</span>
+                              <span className="w-1 h-1 bg-gray-300 rounded-full" />
+                              <span>{donor.year || "N/A"}</span>
+                              {donor.branch && (
+                                <>
+                                  <span className="w-1 h-1 bg-gray-300 rounded-full" />
+                                  <span>{donor.branch}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      
-                      <div className="flex flex-wrap gap-6 mb-6">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Phone className="w-4 h-4 text-gray-400" />
-                          {donor.phoneNumber}
+
+                      {/* Contact Details */}
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Phone className="w-4 h-4 text-gray-400 shrink-0" />
+                          <span className="text-gray-700 truncate">{donor.phoneNumber}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Mail className="w-4 h-4 text-gray-400 shrink-0" />
+                          <span className="text-gray-700 truncate" title={donor.email}>{donor.email}</span>
+                        </div>
+                      </div>
+
+                      {/* Physical & Medical Info */}
+                      <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-gray-100">
+                        <div>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">Weight</p>
+                          <p className="text-sm font-bold text-gray-900">{donor.weight} kg</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">Medical</p>
+                          <p className="text-sm font-bold text-gray-900">N/A</p>
+                        </div>
+                      </div>
+
+                      {/* Eligibility Checklist */}
+                      <div className="space-y-2 mb-4 flex-grow">
+                        <div className={cn("flex items-center gap-2 text-sm", donor.age >= 18 && donor.age <= 65 ? "text-emerald-600" : "text-red-600")}>
+                          <CheckCircle2 className="w-4 h-4" />
+                          Age eligible (18-65)
+                        </div>
+                        <div className={cn("flex items-center gap-2 text-sm", donor.weight >= 45 ? "text-emerald-600" : "text-red-600")}>
+                          <CheckCircle2 className="w-4 h-4" />
+                          Weight eligible ({donor.weight >= 45 ? ">45kg" : "ineligible"})
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Calendar className="w-4 h-4 text-gray-400" />
-                          Approved: <span className="text-emerald-600 font-bold">
-                             {new Date(donor.approvedAt || Date.now()).toLocaleDateString()}
-                          </span>
+                          Registered {getTimeAgo(donor.registeredAt)}
                         </div>
                       </div>
 
                       <Button 
-                        className="w-full h-12 bg-red-600 hover:bg-red-700 font-bold rounded-xl shadow-md group"
-                        onClick={() => openVerification(donor)}
+                        className="w-full h-11 bg-red-600 hover:bg-red-700 font-bold rounded-lg shadow-md"
+                        onClick={() => {
+                          setSelectedDonor(donor);
+                          handleComplete();
+                        }}
                       >
-                        Verify & Start Process <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                        <CheckCircle2 className="w-4 h-4 mr-2" /> Confirm Donation
                       </Button>
                     </CardContent>
                   </Card>

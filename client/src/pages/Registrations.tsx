@@ -9,7 +9,6 @@ import {
   XCircle, 
   Droplet,
   Calendar,
-  Bell,
   LogOut,
   Loader2,
   ChevronLeft,
@@ -114,7 +113,7 @@ export default function Registrations() {
   const fetchRegistrations = useCallback(async () => {
     setLoading(true);
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/donate';
       
       // Build Query Params
       const params = new URLSearchParams({
@@ -207,7 +206,7 @@ export default function Registrations() {
     <div className="min-h-screen bg-gray-50/50 pb-20">
       {/* Top Section */}
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between relative">
           <div className="flex items-center gap-2 font-display font-bold text-xl text-red-600 cursor-pointer" onClick={() => setLocation("/")}>
             <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white">
               <Droplet className="w-5 h-5 fill-current" />
@@ -216,17 +215,17 @@ export default function Registrations() {
             <span className="sm:hidden">Admin</span>
           </div>
           
-          <div className="flex-1 overflow-x-auto scrollbar-hide mx-4 lg:flex-initial lg:overflow-visible">
-            <div className="flex items-center justify-center gap-4 lg:gap-6 text-sm font-semibold text-muted-foreground whitespace-nowrap min-w-max lg:min-w-0">
+          <div className="absolute left-1/2 transform -translate-x-1/2">
+            <div className="flex items-center justify-center gap-4 lg:gap-6 text-sm font-semibold text-muted-foreground whitespace-nowrap">
               <button 
-                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-1"
+                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-4"
                 onClick={() => setLocation("/admin")}
               >
                 Dashboard
               </button>
-              <button className="text-red-600 border-b-2 border-red-600 h-16 px-2 lg:px-1">Registrations</button>
+              <button className="text-red-600 border-b-2 border-red-600 h-16 px-2 lg:px-4">Registrations</button>
               <button 
-                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-1"
+                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-4"
                 onClick={() => setLocation("/admin/verify")}
               >
                 Verify
@@ -236,12 +235,6 @@ export default function Registrations() {
 
           <div className="flex items-center gap-4">
             <span className="hidden sm:inline-block text-sm font-medium">Welcome, Admin! 👋</span>
-            <Button variant="ghost" size="icon" className="relative text-gray-400">
-              <Bell className="w-5 h-5" />
-              {counts.pending > 0 && (
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
-              )}
-            </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground">
               <LogOut className="w-4 h-4 mr-2" /> Logout
             </Button>

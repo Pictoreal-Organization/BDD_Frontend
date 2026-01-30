@@ -8,7 +8,6 @@ import {
   Clock, 
   AlertCircle,
   BarChart3,
-  Bell,
   LogOut,
   ChevronRight,
   ShieldCheck,
@@ -187,20 +186,22 @@ export default function AdminDashboard() {
             <span className="sm:hidden">Admin</span>
           </div>
           
-          <div className="flex items-center gap-3 sm:gap-4 lg:gap-6 text-sm font-semibold text-muted-foreground">
-            <button className="text-red-600 border-b-2 border-red-600 h-16 px-1">Dashboard</button>
-            <button 
-              className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin/registrations")}
-            >
-              Registrations
-            </button>
-            <button 
-              className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin/verify")}
-            >
-              Verify
-            </button>
+          <div className="absolute left-1/2 transform -translate-x-1/2">
+            <div className="flex items-center justify-center gap-4 lg:gap-6 text-sm font-semibold text-muted-foreground whitespace-nowrap">
+              <button className="text-red-600 border-b-2 border-red-600 h-16 px-2 lg:px-4">Dashboard</button>
+              <button 
+                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-4"
+                onClick={() => setLocation("/admin/registrations")}
+              >
+                Registrations
+              </button>
+              <button 
+                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-4"
+                onClick={() => setLocation("/admin/verify")}
+              >
+                Verify
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center gap-4">

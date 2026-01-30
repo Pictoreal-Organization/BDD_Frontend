@@ -15,7 +15,6 @@ import {
   Target,
   FileText,
   Table,
-  Bell,
   LogOut,
   Loader2
 } from "lucide-react";
@@ -184,9 +183,6 @@ export default function Reports() {
 
           <div className="flex items-center gap-4">
             <span className="hidden sm:inline-block text-sm font-medium">Welcome, Admin! 👋</span>
-            <Button variant="ghost" size="icon" className="relative text-gray-400">
-              <Bell className="w-5 h-5" />
-            </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground">
               <LogOut className="w-4 h-4 mr-2" /> Logout
             </Button>
