@@ -13,7 +13,12 @@ export function serveStatic(app: Express) {
   app.use(express.static(distPath));
 
   // fall through to index.html if the file doesn't exist
-  app.use("/{*path}", (_req, res) => {
+  // Don't catch API routes - only handle non-API requests
+  app.get("*", (req, res) => {
+    // Skip API routes
+    if (req.path.startsWith("/api")) {
+      return res.status(404).json({ message: "API endpoint not found" });
+    }
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
