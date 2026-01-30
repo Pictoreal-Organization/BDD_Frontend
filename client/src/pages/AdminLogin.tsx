@@ -18,8 +18,7 @@ const AdminLogin = () => {
   const handleLogin = async (): Promise<void> => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/login"
-, {
+      const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -33,9 +32,10 @@ const AdminLogin = () => {
         localStorage.setItem("adminToken", data.token);
         setLocation("/admin/dashboard");
       } else {
-        alert("Invalid credentials");
+        alert(data.message || "Invalid credentials");
       }
     } catch (error) {
+      console.error("Login error:", error);
       alert("Login failed. Please try again.");
     } finally {
       setLoading(false);
