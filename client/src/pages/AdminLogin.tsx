@@ -18,7 +18,10 @@ const AdminLogin = () => {
   const handleLogin = async (): Promise<void> => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/login", {
+      // Use relative path for same-origin requests (works in both dev and production)
+      const apiUrl = "/api/admin/login";
+      
+      const res = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -26,17 +29,24 @@ const AdminLogin = () => {
         body: JSON.stringify({ email, password }),
       });
 
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.message || "Invalid credentials");
+        setLoading(false);
+        return;
+      }
+
       const data = await res.json();
 
       if (data.token) {
         localStorage.setItem("adminToken", data.token);
         setLocation("/admin/dashboard");
       } else {
-        alert(data.message || "Invalid credentials");
+        alert("Invalid credentials");
       }
     } catch (error) {
       console.error("Login error:", error);
-      alert("Login failed. Please try again.");
+      alert("Login failed. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
