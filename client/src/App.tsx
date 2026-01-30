@@ -14,6 +14,11 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import Registrations from "@/pages/Registrations";
 import Verification from "@/pages/Verification";
 import Reports from "@/pages/Reports";
+import AdminRoute from "./components/AdminRoute";
+import AdminLogin from "./pages/AdminLogin";
+
+
+
 
 function Router() {
   return (
@@ -23,10 +28,38 @@ function Router() {
       <Route path="/donor-dashboard" component={DonorDashboard} />
       <Route path="/profile" component={Profile} />
       <Route path="/history" component={DonationHistory} />
-      <Route path="/admin" component={AdminDashboard} />
-      <Route path="/admin/registrations" component={Registrations} />
-      <Route path="/admin/verify" component={Verification} />
-      <Route path="/admin/reports" component={Reports} />
+      <Route path="/admin" component={AdminLogin} />
+      
+      {/* Protected Admin Routes */}
+      <Route path="/admin/dashboard">
+        {() => (
+          <AdminRoute>
+            <AdminDashboard />
+          </AdminRoute>
+        )}
+      </Route>
+      <Route path="/admin/registrations">
+        {() => (
+          <AdminRoute>
+            <Registrations />
+          </AdminRoute>
+        )}
+      </Route>
+      <Route path="/admin/verify">
+        {() => (
+          <AdminRoute>
+            <Verification />
+          </AdminRoute>
+        )}
+      </Route>
+      <Route path="/admin/reports">
+        {() => (
+          <AdminRoute>
+            <Reports />
+          </AdminRoute>
+        )}
+      </Route>
+      
       <Route component={NotFound} />
     </Switch>
   );

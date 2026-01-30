@@ -141,9 +141,11 @@ export default function Reports() {
     try {
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
       await fetch(`${API_BASE}/logout`);
-      setLocation("/login");
+      localStorage.removeItem('adminToken');
+      setLocation("/admin");
     } catch (e) {
-      setLocation("/login");
+      localStorage.removeItem('adminToken');
+      setLocation("/admin");
     }
   };
 
@@ -162,7 +164,7 @@ export default function Reports() {
           <div className="hidden lg:flex items-center gap-6 text-sm font-semibold text-muted-foreground">
             <button 
               className="hover:text-red-600 transition-colors h-16 px-1"
-              onClick={() => setLocation("/admin")}
+              onClick={() => setLocation("/admin/dashboard")}
             >
               Dashboard
             </button>

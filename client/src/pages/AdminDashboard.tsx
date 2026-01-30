@@ -167,9 +167,11 @@ export default function AdminDashboard() {
     try {
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
       await fetch(`${API_BASE}/logout`);
-      setLocation("/login");
+      localStorage.removeItem('adminToken');
+      setLocation("/admin");
     } catch (e) {
-      setLocation("/login");
+      localStorage.removeItem('adminToken');
+      setLocation("/admin");
     }
   };
 
