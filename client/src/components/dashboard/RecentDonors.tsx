@@ -82,9 +82,9 @@ export function RecentDonors() {
       
       <div className="relative z-10 w-full">
         <div className="flex flex-col items-center justify-center mb-12 text-center">          
-          <h2 className="text-3xl md:text-4xl font-display font-bold text-gray-900 mb-3">
-            The Heroes
-          </h2>
+         <h1 className="text-4xl md:text-5xl font-display font-bold text-gray-900 tracking-tight">
+               <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-900">The Heroes</span>
+            </h1>
           <p className="text-gray-500">Real-time updates of generous souls saving lives.</p>
         </div>
         
