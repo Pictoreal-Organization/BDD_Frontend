@@ -58,7 +58,7 @@ export default function Dashboard() {
             </span>
           </h1>
           <h3 className="text-xl md:text-3xl lg:text-4xl font-display mt-10 font-bold text-gray-900 leading-[1.1] mb-6 tracking-tight">
-            5th February 2026, A3 Building GCR, Starts 10 AM
+            5th February 2026, A3 001 GCR, Starts 10 AM
           </h3>
           
           {/* Subtitle */}
