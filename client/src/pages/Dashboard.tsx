@@ -39,10 +39,10 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="py-8 mt-16">
+      <div className="py-8 mt-24">
         
         {/* PART 1: Hero */}
-        <div className="container mx-auto px-4 mb-12">
+        <div className="container mx-auto px-4">
           {/* <Hero /> */}
           <div className="container mx-auto px-4 relative z-20 text-center mb-4 md:mb-8">
         <motion.div
