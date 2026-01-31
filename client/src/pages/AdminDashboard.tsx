@@ -175,6 +175,49 @@ export default function AdminDashboard() {
     }
   };
 
+  // Export handlers
+  const handleExport = async (format: 'csv' | 'pdf' | 'excel') => {
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
+      const response = await fetch(`${API_BASE}/download/${format}`);
+      
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.statusText}`);
+      }
+
+      // Get filename from response headers or create default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = `blood_donation_registrations.${format}`;
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename=(.+)/);
+        if (match) filename = match[1].replace(/"/g, '');
+      }
+
+      // Download the file
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Export Successful",
+        description: `Data exported as ${format.toUpperCase()} successfully.`,
+      });
+    } catch (error: any) {
+      console.error(`Export ${format} error:`, error);
+      toast({
+        variant: "destructive",
+        title: "Export Failed",
+        description: error.message || `Could not export data as ${format.toUpperCase()}.`,
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50/50">
       {/* Top Bar */}
@@ -186,24 +229,6 @@ export default function AdminDashboard() {
             </div>
             <span className="hidden sm:inline">Admin Panel</span>
             <span className="sm:hidden">Admin</span>
-          </div>
-          
-          <div className="absolute left-1/2 transform -translate-x-1/2">
-            <div className="flex items-center justify-center gap-4 lg:gap-6 text-sm font-semibold text-muted-foreground whitespace-nowrap">
-              <button className="text-red-600 border-b-2 border-red-600 h-16 px-2 lg:px-4">Dashboard</button>
-              <button 
-                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-4"
-                onClick={() => setLocation("/admin/registrations")}
-              >
-                Registrations
-              </button>
-              <button 
-                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-4"
-                onClick={() => setLocation("/admin/verify")}
-              >
-                Verify
-              </button>
-            </div>
           </div>
 
           <div className="flex items-center gap-4">
@@ -271,19 +296,25 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent className="p-8 space-y-6">
                   {inventory.length > 0 ? (
-                    inventory.map((bg, i) => (
-                      <div key={i} className="space-y-2 group">
-                        <div className="flex justify-between items-end">
-                          <span className="text-sm font-bold text-gray-700 w-8">{bg.group}</span>
-                          <span className="text-xs font-bold text-gray-400 group-hover:text-red-600 transition-colors">{bg.count} Units</span>
-                        </div>
-                        <Progress 
-                          value={Math.min((bg.count / bg.max) * 100, 100)} 
-                          className="h-3 bg-gray-50" 
-                          indicatorClassName={cn("transition-all duration-1000", bg.color)} 
-                        />
-                      </div>
-                    ))
+                    (() => {
+                      const totalCount = inventory.reduce((sum, bg) => sum + bg.count, 0);
+                      return inventory.map((bg, i) => {
+                        const percentage = totalCount > 0 ? ((bg.count / totalCount) * 100).toFixed(1) : 0;
+                        return (
+                          <div key={i} className="space-y-2 group">
+                            <div className="flex justify-between items-end">
+                              <span className="text-sm font-bold text-gray-700 w-8">{bg.group}</span>
+                              <span className="text-xs font-bold text-gray-400 group-hover:text-red-600 transition-colors">{bg.count} Units ({percentage}%)</span>
+                            </div>
+                            <Progress 
+                              value={totalCount > 0 ? (bg.count / totalCount) * 100 : 0} 
+                              className="h-3 bg-gray-50" 
+                              indicatorClassName={cn("transition-all duration-1000", bg.color)} 
+                            />
+                          </div>
+                        );
+                      });
+                    })()
                   ) : (
                     <div className="text-center py-10 text-gray-400">No inventory data available.</div>
                   )}
@@ -292,6 +323,37 @@ export default function AdminDashboard() {
 
               {/* Sidebar Area */}
               <div className="space-y-8">
+                {/* Navigation Menu */}
+                <Card className="border-none shadow-xl bg-white overflow-hidden">
+                  <CardHeader className="border-b border-gray-50">
+                    <CardTitle className="text-lg font-display font-bold">Navigation</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-3">
+                    <Button 
+                      className="w-full h-14 flex items-center justify-start gap-3 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-all"
+                    >
+                      <BarChart3 className="w-5 h-5" />
+                      <span className="font-bold">Dashboard</span>
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      className="w-full h-14 flex items-center justify-start gap-3 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all"
+                      onClick={() => setLocation("/admin/registrations")}
+                    >
+                      <UserPlus className="w-5 h-5" />
+                      <span className="font-bold">Registrations</span>
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      className="w-full h-14 flex items-center justify-start gap-3 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all"
+                      onClick={() => setLocation("/admin/verify")}
+                    >
+                      <ShieldCheck className="w-5 h-5" />
+                      <span className="font-bold">Verify</span>
+                    </Button>
+                  </CardContent>
+                </Card>
+
                 {/* Export Options */}
                 <Card className="border-none shadow-xl bg-white overflow-hidden">
                   <CardHeader className="border-b border-gray-50">
@@ -300,15 +362,27 @@ export default function AdminDashboard() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6 space-y-4">
-                    <Button variant="outline" className="w-full h-20 flex-col gap-2 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all">
+                    <Button 
+                      variant="outline" 
+                      className="w-full h-20 flex-col gap-2 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all"
+                      onClick={() => handleExport('csv')}
+                    >
                       <Table className="w-5 h-5" /> 
                       <span className="font-bold text-sm">Export as CSV</span>
                     </Button>
-                    <Button variant="outline" className="w-full h-20 flex-col gap-2 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all">
+                    <Button 
+                      variant="outline" 
+                      className="w-full h-20 flex-col gap-2 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all"
+                      onClick={() => handleExport('pdf')}
+                    >
                       <FileText className="w-5 h-5" /> 
                       <span className="font-bold text-sm">Export as PDF</span>
                     </Button>
-                    <Button variant="outline" className="w-full h-20 flex-col gap-2 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all">
+                    <Button 
+                      variant="outline" 
+                      className="w-full h-20 flex-col gap-2 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all"
+                      onClick={() => handleExport('excel')}
+                    >
                       <BarChart3 className="w-5 h-5" /> 
                       <span className="font-bold text-sm">Export as Excel</span>
                     </Button>

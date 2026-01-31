@@ -14,12 +14,12 @@ export function Hero() {
       try {
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
         
-        // CHANGED: Fetch from dashboard stats to get granular status counts
+        // Fetch from dashboard stats
         const response = await fetch(`${API_BASE}/dashboard/stats`);
         
         if (response.ok) {
           const data = await response.json();
-          // Use 'completed' count to show only verified donors who finished the process
+          // Use 'completed' count
           setDonorCount(data.completed || 0); 
         }
       } catch (error) {
@@ -36,7 +36,7 @@ export function Hero() {
   }, []);
 
   return (
-    <div className="relative w-full pt-6 md:pt-10 overflow-hidden bg-gradient-to-b from-white to-gray-50/50 pb-16">
+    <div className="relative w-full pt-0 md:pt-0 overflow-hidden bg-gradient-to-b from-white to-gray-50/50 pb-24">
       
       {/* --- BACKGROUND DOODLES SECTION --- */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none select-none z-0">
@@ -51,43 +51,13 @@ export function Hero() {
          <Plus className="absolute bottom-32 left-[40%] w-6 h-6 text-red-300/30 rotate-45" strokeWidth={2} />
       </div>
 
-      {/* 1. HERO TEXT SECTION */}
-      <div className="container mx-auto px-4 relative z-20 text-center mb-4 md:mb-8">
-        <motion.div
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ duration: 0.6 }}
-        >
-          {/* Main Headline */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-display mt-10 font-bold text-gray-900 leading-[1.1] mb-6 tracking-tight">
-            Donate Blood, <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-500">
-              Save a Life Today.
-            </span>
-          </h1>
-          
-          {/* Subtitle */}
-          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-4 leading-relaxed">
-            Join the Blood Donation Drive at A3 building, room GCR, and save a life today. Your small act of kindness can make a huge difference.
-          </p>
-        </motion.div>
-      </div>
-
-      <div className="flex justify-center w-full mt-8 relative z-30"> 
-        <Button 
-          size="lg" 
-          className="bg-red-600 text-white hover:bg-red-700 h-14 px-10 text-lg font-semibold shadow-xl shadow-red-200 whitespace-nowrap"
-          onClick={() => setLocation("/register")}
-        >
-          Register Now
-        </Button>
-      </div>
-   
       {/* 2. STATS VISUALIZATION Section */}
-      <div className="relative z-10 w-full max-w-[1400px] mx-auto h-[350px] md:h-[450px] flex justify-center items-center mt-25">
+      {/* Changed to flex-col to stack the circle and button vertically */}
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto min-h-[500px] flex flex-col justify-center items-center mt-12 md:mt-20">
         
         {/* --- LAYER B: The Two Logos (Left & Right) --- */}
-        <div className="absolute inset-0 w-full flex items-center justify-between px-[5%] md:px-[10%] lg:px-[18%] z-10 pointer-events-none">
+        {/* Added 'hidden md:flex' to hide on mobile */}
+        <div className="absolute inset-0 w-full hidden md:flex items-center justify-between px-[5%] md:px-[10%] lg:px-[18%] z-10 pointer-events-none top-[-50px]">
               
           {/* Left Logo: Pictoreal */}
           <motion.div 
@@ -111,7 +81,7 @@ export function Hero() {
             className="bg-white p-4 md:p-6 rounded-full shadow-2xl shadow-red-900/20 border-4 border-red-50 flex items-center justify-center transform hover:scale-110 transition-transform duration-300 pointer-events-auto"
           >
             <img 
-              src="/NSS.jpg.jpeg" 
+              src="/Nss_logo.png" 
               alt="NSS Logo" 
               className="w-16 h-16 md:w-32 md:h-32 rounded-full object-cover"
             />
@@ -123,7 +93,7 @@ export function Hero() {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="relative z-20"
+          className="relative z-20 mb-10"
         >
           {/* Main Circle Card */}
           <div className="w-64 h-64 md:w-80 md:h-80 bg-white rounded-full shadow-[0_20px_50px_-10px_rgba(220,38,38,0.3)] flex flex-col items-center justify-center relative border-[8px] border-white ring-1 ring-gray-100">
@@ -145,15 +115,31 @@ export function Hero() {
               </span>
               
               {/* Trend Pill */}
-              <span className="mt-4 flex items-center gap-1.5 bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-bold shadow-sm border border-green-100 bg-white">
-                <TrendingUp className="w-4 h-4" /> 
-                <span>Growing Daily</span>
-              </span>
+             
             </div>
             
             {/* Subtle Pulse Behind */}
             <div className="absolute -inset-1 rounded-full bg-red-50 -z-10 animate-pulse" />
           </div>
+        </motion.div>
+
+        {/* --- REGISTER BUTTON SECTION --- */}
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="flex flex-col items-center gap-4 z-20"
+        >
+            <p className="text-gray-500 font-medium text-lg">
+                If you want to donate blood, register here
+            </p>
+            <Button 
+                size="lg" 
+                className="bg-red-600 text-white hover:bg-red-700 h-12 px-8 text-lg font-semibold shadow-lg shadow-red-200 rounded-full transition-all hover:scale-105" 
+                onClick={() => setLocation("/register")}
+            >
+                Register Now
+            </Button>
         </motion.div>
         
       </div>

@@ -14,11 +14,17 @@ import {
   Loader2,
   Printer,
   UserCheck,
-  Mail
+  Mail,
+  ChevronLeft,
+  ChevronRight,
+  BarChart3,
+  Users,
+  Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +48,8 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
 
+type ViewTab = "verify" | "completed";
+
 // Interface matching Backend Search Response
 interface Donor {
   id: string;
@@ -57,17 +65,25 @@ interface Donor {
   status: string;
   approvedAt: string;
   registeredAt: string;
+  completedAt?: string;
+  updatedAt?: string;
 }
 
 export default function Verification() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   
+  // View State
+  const [activeView, setActiveView] = useState<ViewTab>("verify");
+  
   // Data States
   const [searchQuery, setSearchQuery] = useState("");
   const [donors, setDonors] = useState<Donor[]>([]);
+  const [completedDonors, setCompletedDonors] = useState<Donor[]>([]);
   const [selectedDonor, setSelectedDonor] = useState<Donor | null>(null);
   const [todayCount, setTodayCount] = useState(0);
+  const [completedPage, setCompletedPage] = useState(1);
+  const [completedTotalPages, setCompletedTotalPages] = useState(1);
   
   // Loading States
   const [loading, setLoading] = useState(false);
@@ -124,10 +140,52 @@ export default function Verification() {
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
+  // 3. Fetch Completed Donations
+  const fetchCompletedDonations = useCallback(async () => {
+    setLoading(true);
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
+      const params = new URLSearchParams({
+        status: "completed",
+        page: completedPage.toString(),
+        limit: "10",
+        sortBy: "completedAt",
+        sortOrder: "desc"
+      });
+      const response = await fetch(`${API_BASE}/registrations?${params.toString()}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Completed donors data:', data.donors); // Debug: Check what fields are available
+        // Sort by completion time (most recent first) on client side
+        const sortedDonors = data.donors.sort((a: Donor, b: Donor) => {
+          // Try different possible field names for completion time
+          const timeA = new Date(a.completedAt || a.updatedAt || a.approvedAt || a.registeredAt).getTime();
+          const timeB = new Date(b.completedAt || b.updatedAt || b.approvedAt || b.registeredAt).getTime();
+          console.log(`Comparing ${a.name}: ${a.completedAt || a.updatedAt || 'using fallback'} vs ${b.name}: ${b.completedAt || b.updatedAt || 'using fallback'}`);
+          return timeB - timeA; // Descending order (newest first)
+        });
+        setCompletedDonors(sortedDonors);
+        setCompletedTotalPages(data.pagination.totalPages);
+      }
+    } catch (error) {
+      console.error("Error fetching completed donations:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [completedPage]);
+
   // Initial Load
   useEffect(() => {
     fetchTodayCount();
   }, [fetchTodayCount]);
+
+  // Load completed donations when on completed tab
+  useEffect(() => {
+    if (activeView === "completed") {
+      fetchCompletedDonations();
+    }
+  }, [activeView, fetchCompletedDonations]);
 
 
   // 3. Complete Donation Action
@@ -151,15 +209,22 @@ export default function Verification() {
 
       if (!response.ok) throw new Error("Failed to complete donation");
 
-      // Success UI
-      setStep(3);
-      fetchTodayCount(); // Refresh stats
+      // Success - refresh and reset without showing modal
+      fetchTodayCount();
+      toast({
+        title: "Donation Completed!",
+        description: `${selectedDonor.name}'s donation has been recorded successfully.`,
+      });
       confetti({
         particleCount: 150,
         spread: 70,
         origin: { y: 0.6 },
         colors: ["#DC2626", "#FCA5A5", "#FFFFFF"]
       });
+      reset();
+      
+      // Refresh list to remove completed donor
+      setDonors(prev => prev.filter(d => d.id !== selectedDonor.id));
 
     } catch (error) {
       toast({
@@ -272,24 +337,6 @@ export default function Verification() {
             <span className="hidden sm:inline">Admin Panel</span>
             <span className="sm:hidden">Admin</span>
           </div>
-          
-          <div className="absolute left-1/2 transform -translate-x-1/2">
-            <div className="flex items-center justify-center gap-4 lg:gap-6 text-sm font-semibold text-muted-foreground whitespace-nowrap">
-              <button 
-                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-4"
-                onClick={() => setLocation("/admin/dashboard")}
-              >
-                Dashboard
-              </button>
-              <button 
-                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-4"
-                onClick={() => setLocation("/admin/registrations")}
-              >
-                Registrations
-              </button>
-              <button className="text-red-600 border-b-2 border-red-600 h-16 px-2 lg:px-4">Verify</button>
-            </div>
-          </div>
 
           <div className="flex items-center gap-4">
             <span className="hidden sm:inline-block text-sm font-medium">Welcome, Admin! 👋</span>
@@ -303,7 +350,36 @@ export default function Verification() {
         </div>
       </nav>
 
-      <main className="container mx-auto px-4 py-8 max-w-6xl space-y-8">
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="flex gap-6">
+          {/* Main Content */}
+          <div className="flex-1 space-y-8">
+            {/* View Switcher */}
+            <div className="flex gap-2">
+            <Button
+              variant={activeView === "verify" ? "default" : "outline"}
+              onClick={() => setActiveView("verify")}
+              className={cn(
+                "rounded-full px-6 h-10 font-bold transition-all",
+                activeView === "verify" ? "bg-red-600 hover:bg-red-700 shadow-lg" : "bg-white text-gray-600"
+              )}
+            >
+              Verify Donors
+            </Button>
+            <Button
+              variant={activeView === "completed" ? "default" : "outline"}
+              onClick={() => setActiveView("completed")}
+              className={cn(
+                "rounded-full px-6 h-10 font-bold transition-all",
+                activeView === "completed" ? "bg-red-600 hover:bg-red-700 shadow-lg" : "bg-white text-gray-600"
+              )}
+            >
+              Completed Donations
+            </Button>
+          </div>
+
+        {activeView === "verify" ? (
+          <>
         {/* Search Bar */}
         <div className="flex gap-2">
           <div className="relative flex-1">
@@ -424,6 +500,157 @@ export default function Verification() {
                 <p className="text-sm text-gray-400 mt-1">Make sure the registration is approved in the dashboard first.</p>
               </div>
             )}
+          </div>
+        </div>
+          </>
+        ) : (
+          // Completed Donations Table View
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-display font-bold text-gray-800">
+                Completed Donations
+              </h2>
+              <div className="text-sm text-gray-500">
+                Total: {completedDonors.length} completed
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="flex justify-center items-center py-20">
+                <Loader2 className="w-10 h-10 animate-spin text-red-600" />
+              </div>
+            ) : completedDonors.length > 0 ? (
+              <>
+                <Card className="border-none shadow-sm bg-white overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Sr. No</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Blood Group</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Name</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Age</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Category</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Branch</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Completed</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-100">
+                        <AnimatePresence mode="popLayout">
+                          {completedDonors.map((donor, index) => (
+                            <motion.tr
+                              key={donor.id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="hover:bg-gray-50 transition-colors"
+                            >
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-bold text-gray-700">{(completedPage - 1) * 10 + index + 1}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center text-red-600 font-bold text-sm">
+                                  {donor.bloodGroup}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-bold text-gray-900">{donor.name}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-700">{donor.age} Yrs</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-700">{donor.year}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-700">{donor.branch || "-"}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-500">{getTimeAgo(donor.completedAt || donor.updatedAt || donor.registeredAt)}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 font-bold capitalize">
+                                  Completed
+                                </Badge>
+                              </td>
+                            </motion.tr>
+                          ))}
+                        </AnimatePresence>
+                      </tbody>
+                    </table>
+                  </div>
+                </Card>
+
+                {/* Pagination */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+                  <p className="text-sm text-muted-foreground">
+                    Page {completedPage} of {completedTotalPages}
+                  </p>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setCompletedPage(p => Math.max(1, p - 1))}
+                      disabled={completedPage === 1}
+                    >
+                      <ChevronLeft className="w-4 h-4 mr-1" /> Previous
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setCompletedPage(p => p + 1)}
+                      disabled={completedPage >= completedTotalPages}
+                    >
+                      Next <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="py-20 text-center bg-white rounded-2xl border border-dashed border-gray-300">
+                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle2 className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">No completed donations</h3>
+                <p className="text-gray-500">Completed donations will appear here.</p>
+              </div>
+            )}
+          </div>
+        )}
+        </div>
+
+          {/* Navigation Sidebar */}
+          <div className="w-64 shrink-0">
+            <Card className="border-none shadow-sm bg-white p-4 sticky top-24">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Navigation</h3>
+              <div className="space-y-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => setLocation("/admin/dashboard")}
+                  className="w-full justify-start h-12 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  <BarChart3 className="w-5 h-5 mr-3" />
+                  Dashboard
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setLocation("/admin/registrations")}
+                  className="w-full justify-start h-12 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  <Users className="w-5 h-5 mr-3" />
+                  Registrations
+                </Button>
+                <Button
+                  variant="default"
+                  className="w-full justify-start h-12 px-4 text-sm font-bold bg-red-600 hover:bg-red-700 text-white"
+                >
+                  <Shield className="w-5 h-5 mr-3" />
+                  Verify
+                </Button>
+              </div>
+            </Card>
           </div>
         </div>
       </main>

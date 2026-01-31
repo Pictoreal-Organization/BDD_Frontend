@@ -103,8 +103,6 @@ export default function Register() {
     if (step === 1) {
       fieldsToValidate = ["fullName", "email", "mobile", "category", "branch"];
       if (category === "Student") fieldsToValidate.push("year");
-    } else if (step === 2) {
-      fieldsToValidate = ["age", "weight", "bloodGroup"];
     }
 
     const isStepValid = await trigger(fieldsToValidate);
@@ -166,9 +164,9 @@ export default function Register() {
           <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 -translate-y-1/2 z-0" />
           <div 
             className="absolute top-1/2 left-0 h-0.5 bg-red-600 -translate-y-1/2 z-0 transition-all duration-500" 
-            style={{ width: `${((step - 1) / 2) * 100}%` }}
+            style={{ width: `${((step - 1) / 1) * 100}%` }}
           />
-          {[1, 2, 3].map((s) => (
+          {[1, 2].map((s) => (
             <div key={s} className="relative z-10 flex flex-col items-center">
               <div 
                 className={cn(
@@ -182,7 +180,7 @@ export default function Register() {
                 "mt-2 text-xs font-medium uppercase tracking-wider",
                 step >= s ? "text-red-600" : "text-gray-400"
               )}>
-                {s === 1 ? "Personal" : s === 2 ? "Medical" : "Confirm"}
+                {s === 1 ? "Personal" : "Medical"}
               </span>
             </div>
           ))}
@@ -194,11 +192,10 @@ export default function Register() {
           <CardHeader className="space-y-1 bg-gray-50/50 rounded-t-xl border-b border-gray-100">
             <CardTitle className="text-2xl font-display font-bold text-gray-800">
               {step === 1 && "Step 1: Personal Details"}
-              {step === 2 && "Step 2: Medical Check"}
-              {step === 3 && "Step 3: Review & Submit"}
+              {step === 2 && "Step 2: Medical & Confirmation"}
             </CardTitle>
             <CardDescription>
-              Register as Blood Donor - Step {step} of 3
+              Register as Blood Donor - Step {step} of 2
             </CardDescription>
           </CardHeader>
 
@@ -219,7 +216,7 @@ export default function Register() {
                       <User className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
                       <Input 
                         id="fullName" 
-                        placeholder="John Doe" 
+                        placeholder="Chinmay Patil" 
                         className="pl-10" 
                         {...register("fullName")}
                       />
@@ -238,7 +235,7 @@ export default function Register() {
                       <Input 
                         id="email" 
                         type="email" 
-                        placeholder="john@example.com" 
+                        placeholder="example@gmail.com" 
                         className="pl-10"
                         {...register("email")}
                       />
@@ -288,7 +285,9 @@ export default function Register() {
                         <SelectContent>
                           <SelectItem value="Computer">Computer (CE)</SelectItem>
                           <SelectItem value="IT">IT</SelectItem>
-                          <SelectItem value="EnTC">EnTC</SelectItem>
+                          <SelectItem value="E&TC">E&TC</SelectItem>
+                          <SelectItem value="AIDS">AIDS</SelectItem>
+                          <SelectItem value="ECE">ECE</SelectItem>
                           <SelectItem value="Other">Other</SelectItem>
                         </SelectContent>
                       </Select>
@@ -310,8 +309,8 @@ export default function Register() {
                             <SelectValue placeholder="Select Year" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="FE">FE (First Year)</SelectItem>
-                            <SelectItem value="SE">SE (Second Year)</SelectItem>
+                            <SelectItem value="FY">FY (First Year)</SelectItem>
+                            <SelectItem value="SY">SY (Second Year)</SelectItem>
                             <SelectItem value="TE">TE (Third Year)</SelectItem>
                             <SelectItem value="BE">BE (Final Year)</SelectItem>
                           </SelectContent>
@@ -382,38 +381,10 @@ export default function Register() {
                       </ul>
                     </div>
                   </div>
-                </motion.div>
-              )}
 
-              {step === 3 && (
-                <motion.div
-                  key="step3"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-6"
-                >
-                  {/* Summary Card */}
-                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 space-y-2 text-sm">
-                    <h4 className="font-semibold text-gray-900 mb-2">Review Details</h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="text-gray-500">Name:</span>
-                      <span className="font-medium">{watch("fullName")}</span>
-                      
-                      <span className="text-gray-500">Contact:</span>
-                      <span className="font-medium">{watch("mobile")}</span>
-                      
-                      <span className="text-gray-500">Details:</span>
-                      <span className="font-medium">{watch("branch")} ({watch("category")})</span>
-                      
-                      <span className="text-gray-500">Medical:</span>
-                      <span className="font-medium">{watch("bloodGroup")}, {watch("weight")}kg</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4 pt-2">
+                  {/* Checkboxes moved from Step 3 */}
+                  <div className="space-y-4 pt-4">
                     <div className="flex items-start space-x-2">
-                      {/* FIX APPLIED HERE: Added { shouldValidate: true } */}
                       <Checkbox 
                         id="terms" 
                         onCheckedChange={(v) => setValue("agreeTerms", !!v, { shouldValidate: true })} 
@@ -425,7 +396,6 @@ export default function Register() {
                     {errors.agreeTerms && <p className="text-xs text-red-500 ml-6">{errors.agreeTerms.message}</p>}
 
                     <div className="flex items-start space-x-2">
-                      {/* FIX APPLIED HERE: Added { shouldValidate: true } */}
                       <Checkbox 
                         id="certify" 
                         onCheckedChange={(v) => setValue("certifyInfo", !!v, { shouldValidate: true })} 
@@ -438,6 +408,8 @@ export default function Register() {
                   </div>
                 </motion.div>
               )}
+
+
             </AnimatePresence>
           </CardContent>
 
@@ -452,7 +424,7 @@ export default function Register() {
               </Button>
             )}
 
-            {step < 3 ? (
+            {step < 2 ? (
               <Button type="button" onClick={nextStep} className="bg-red-600 hover:bg-red-700">
                 Next Step <ChevronRight className="w-4 h-4 ml-2" />
               </Button>
