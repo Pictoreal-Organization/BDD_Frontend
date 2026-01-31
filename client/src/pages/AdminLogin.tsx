@@ -19,7 +19,8 @@ const AdminLogin = () => {
     setLoading(true);
     try {
       // Use relative path for same-origin requests (works in both dev and production)
-      const apiUrl = "/api/admin/login";
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
+      const apiUrl = `${API_BASE}/api/admin/login`;
       
       const res = await fetch(apiUrl, {
         method: "POST",
