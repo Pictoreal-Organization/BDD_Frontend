@@ -39,7 +39,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="py-8 mt-6">
+      <div className="py-8 mt-16">
         
         {/* PART 1: Hero */}
         <div className="container mx-auto px-4 mb-12">
