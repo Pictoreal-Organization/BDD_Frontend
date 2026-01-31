@@ -57,7 +57,7 @@ export default function Dashboard() {
               Save a Life Today.
             </span>
           </h1>
-          <h3 className="text-xl md:text-6xl lg:text-7xl font-display mt-10 font-bold text-red-600 leading-[1.1] mb-6 tracking-tight">
+          <h3 className="text-xl md:text-3xl lg:text-4xl font-display mt-10 font-bold text-red-600 leading-[1.1] mb-6 tracking-tight">
             5th February 2026, A3 Building GCR, Starts 10 AM
           </h3>
           
