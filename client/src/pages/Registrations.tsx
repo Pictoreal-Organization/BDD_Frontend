@@ -126,8 +126,11 @@ export default function Registrations() {
         search: searchQuery,
       });
 
-      if (bloodFilter) params.append("bloodGroup", bloodFilter);
-      if (categoryFilter) params.append("category", categoryFilter);
+      if (bloodFilter && bloodFilter !== "All") params.append("bloodGroup", bloodFilter);
+      // Don't send "Student" to backend as it's stored as year values; we'll filter client-side
+      if (categoryFilter && categoryFilter !== "All" && categoryFilter !== "Student") {
+        params.append("category", categoryFilter);
+      }
 
       const response = await fetch(`${API_BASE}/registrations?${params.toString()}`);
 
@@ -135,7 +138,25 @@ export default function Registrations() {
 
       const data: ApiResponse = await response.json();
 
-      setRegistrations(data.donors);
+      // Map the backend 'year' field to 'category' for display
+      const mappedDonors = data.donors.map(donor => {
+        const yearValue = (donor as any).year || donor.category || "N/A";
+        // If year contains student-related terms, show "Student"
+        const studentTerms = ["Year", "FY", "SY", "TY", "TE", "BE", "1st", "2nd", "3rd", "4th"];
+        const isStudent = studentTerms.some(term => yearValue.includes(term));
+        const displayCategory = isStudent ? "Student" : yearValue;
+        return {
+          ...donor,
+          category: displayCategory
+        };
+      });
+
+      // Client-side filter for "Student" category since backend stores them as year values
+      const filteredDonors = categoryFilter === "Student" 
+        ? mappedDonors.filter(donor => donor.category === "Student")
+        : mappedDonors;
+
+      setRegistrations(filteredDonors);
       setCounts(data.counts);
       setTotalPages(data.pagination.totalPages);
 
@@ -302,6 +323,7 @@ export default function Registrations() {
                       <SelectItem value="Student">Student</SelectItem>
                       <SelectItem value="Faculty">Faculty</SelectItem>
                       <SelectItem value="Staff">Staff</SelectItem>
+                      <SelectItem value="External">External</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -370,17 +392,19 @@ export default function Registrations() {
                               </div>
                             </div>
 
-                            {/* Physical & Medical Info */}
+                            {/* Physical & Category Info */}
                             <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-gray-100">
                               <div>
                                 <p className="text-xs text-muted-foreground uppercase tracking-wider">Weight</p>
                                 <p className="text-sm font-bold text-gray-900">{reg.weight} kg</p>
                               </div>
                               <div>
-                                <p className="text-xs text-muted-foreground uppercase tracking-wider">Medical</p>
-                                <p className="text-sm font-bold text-gray-900 truncate" title={reg.medicalConditions || "None"}>
-                                  {reg.medicalConditions || "None"}
-                                </p>
+                                <p className="text-xs text-muted-foreground uppercase tracking-wider">Blood Group</p>
+                                <p className="text-sm font-bold text-red-600">{reg.bloodGroup}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground uppercase tracking-wider">Category</p>
+                                <p className="text-sm font-bold text-gray-900">{reg.category}</p>
                               </div>
                             </div>
 
