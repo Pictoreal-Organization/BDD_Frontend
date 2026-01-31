@@ -57,9 +57,9 @@ export default function Dashboard() {
               Save a Life Today.
             </span>
           </h1>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-display mt-10 font-bold text-gray-900 leading-[1.1] mb-6 tracking-tight">
+          <h3 className="text-4xl md:text-6xl lg:text-7xl font-display mt-10 font-bold from-red-600 to-red-500 leading-[1.1] mb-6 tracking-tight">
             5th February 2026, A3 Building GCR, Starts 10 AM
-          </h1>
+          </h3>
           
           {/* Subtitle */}
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-4 leading-relaxed">
@@ -87,12 +87,12 @@ export default function Dashboard() {
         </div>
 
         {/* PART 3: Blood Grid */}
-        <BloodGrid />
+        {/* <BloodGrid /> */}
 
         {/* PART 4: Recent Donors */}
         <div className="container mx-auto px-4 mt-12 mb-12">
           <div className="max-w-6xl mx-auto">
-             <RecentDonors />
+             {/* <RecentDonors /> */}
           </div>
         </div>
 
