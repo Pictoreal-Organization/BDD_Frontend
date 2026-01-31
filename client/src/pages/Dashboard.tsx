@@ -4,6 +4,7 @@ import { RecentDonors } from "@/components/dashboard/RecentDonors";
 import { Stats } from "@/components/dashboard/Stats"; // Import the new component
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import Navbar from "@/components/Navbar/navbar";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -12,7 +13,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50/50 pb-20 overflow-x-hidden">
       
       {/* Top Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-red-200 shadow-sm relative overflow-hidden">
+      {/* <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-red-200 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="container mx-auto px-4 h-20 flex items-center justify-between relative z-10">
           <div className="flex items-center gap-3 font-display font-bold text-xl tracking-wide text-gray-900">
@@ -31,7 +32,10 @@ export default function Dashboard() {
             </Button>
           </div>
         </div>
-      </nav>
+      </nav> */}
+      <div>
+        <Navbar />
+      </div>
 
       {/* Main Content */}
       <div className="py-8">
