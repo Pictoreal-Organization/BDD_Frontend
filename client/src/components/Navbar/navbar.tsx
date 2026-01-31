@@ -23,13 +23,21 @@ export default function Navbar() {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const toggleBtnRef = useRef<HTMLButtonElement>(null);
 
+  // const navLinks = [
+  //   { text: "Home", href: "/" },
+  //   { text: "Events", href: "/events" },
+  //   { text: "Blogs", href: "/blogs" },
+  //   { text: "Articles", href: "/audio/v27" },
+  //   { text: "OurTeam", href: "/ourteam" },
+  // ];
   const navLinks = [
-    { text: "Home", href: "/" },
-    { text: "Events", href: "/events" },
-    { text: "Blogs", href: "/blogs" },
-    { text: "Articles", href: "/audio/v27" },
-    { text: "OurTeam", href: "/ourteam" },
+    { text: "Home", href: "https://pictoreal.in" },
+    { text: "Events", href: "https://pictoreal.in/events" },
+    { text: "Blogs", href: "https://pictoreal.in/blogs" },
+    { text: "Articles", href: "https://pictoreal.in/audio/v27" },
+    { text: "OurTeam", href: "https://pictoreal.in/ourteam" },
   ];
+
 
   const getActiveIndex = () => {
     return navLinks.findIndex((link) => {
@@ -165,7 +173,8 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link href="/">
+            {/* <Link href="/"> */}
+            <Link href="https://pictoreal.in">
               <div className="cursor-pointer">
                 <img
                     src="/pictoreal.png"
@@ -217,19 +226,6 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* Arrow Button (Red Theme Props) */}
-            {/* <div className="hidden md:block">
-              <ArrowBtn 
-                text="Magazines" 
-                path="/magazines" 
-                bgColor="#DC2626"      // red-600
-                hoverColor="#B91C1C"   // red-700
-                textColor="#FFFFFF"
-                circleBg="#FFFFFF"
-                arrowColor="#DC2626"
-              />
-            </div> */}
-
              <Button 
                             size="lg" 
                             className="bg-red-600 text-white hover:bg-red-700 h-12 px-8 text-lg font-semibold shadow-lg shadow-red-200 rounded-full transition-all hover:scale-105" 
@@ -275,7 +271,7 @@ export default function Navbar() {
           <div className="pt-2">
             <ArrowBtn 
                 text="Magazines" 
-                path="/magazines" 
+                path="https://pictoreal.in/magazines"
                 bgColor="#DC2626" 
                 hoverColor="#B91C1C"
                 textColor="#FFFFFF"
