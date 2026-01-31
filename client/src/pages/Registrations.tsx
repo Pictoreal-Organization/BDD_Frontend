@@ -12,7 +12,10 @@ import {
   LogOut,
   Loader2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  BarChart3,
+  Users,
+  Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -216,24 +219,6 @@ export default function Registrations() {
             <span className="hidden sm:inline">Admin Panel</span>
             <span className="sm:hidden">Admin</span>
           </div>
-          
-          <div className="absolute left-1/2 transform -translate-x-1/2">
-            <div className="flex items-center justify-center gap-4 lg:gap-6 text-sm font-semibold text-muted-foreground whitespace-nowrap">
-              <button 
-                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-4"
-                onClick={() => setLocation("/admin/dashboard")}
-              >
-                Dashboard
-              </button>
-              <button className="text-red-600 border-b-2 border-red-600 h-16 px-2 lg:px-4">Registrations</button>
-              <button 
-                className="hover:text-red-600 transition-colors h-16 px-2 lg:px-4"
-                onClick={() => setLocation("/admin/verify")}
-              >
-                Verify
-              </button>
-            </div>
-          </div>
 
           <div className="flex items-center gap-4">
             <span className="hidden sm:inline-block text-sm font-medium">Welcome, Admin! 👋</span>
@@ -247,33 +232,36 @@ export default function Registrations() {
         </div>
       </nav>
 
-      <main className="container mx-auto px-4 py-8 max-w-6xl space-y-6">
-        {/* Tabs */}
-        <div className="flex flex-wrap gap-2">
-          {(["pending", "approved", "rejected", "all"] as Tab[]).map((tab) => (
-            <Button
-              key={tab}
-              variant={activeTab === tab ? "default" : "outline"}
-              onClick={() => { setActiveTab(tab); setPage(1); }}
-              className={cn(
-                "rounded-full px-6 h-10 font-bold transition-all capitalize",
-                activeTab === tab ? "bg-red-600 hover:bg-red-700 shadow-lg" : "bg-white text-gray-600"
-              )}
-            >
-              {tab}
-              <span className={cn(
-                "ml-2 px-2 py-0.5 rounded-full text-[10px]",
-                activeTab === tab ? "bg-white/20" : "bg-gray-100"
-              )}>
-                {/* Dynamically access the count using key */}
-                {counts[tab === "all" ? "all" : tab] || 0}
-              </span>
-            </Button>
-          ))}
-        </div>
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="flex gap-6">
+          {/* Main Content */}
+          <div className="flex-1 space-y-6">
+            {/* Status Tabs */}
+            <div className="flex flex-wrap gap-2">
+            {(["pending", "approved", "rejected", "all"] as Tab[]).map((tab) => (
+              <Button
+                key={tab}
+                variant={activeTab === tab ? "default" : "outline"}
+                onClick={() => { setActiveTab(tab); setPage(1); }}
+                className={cn(
+                  "rounded-full px-6 h-10 font-bold transition-all capitalize",
+                  activeTab === tab ? "bg-red-600 hover:bg-red-700 shadow-lg" : "bg-white text-gray-600"
+                )}
+              >
+                {tab}
+                <span className={cn(
+                  "ml-2 px-2 py-0.5 rounded-full text-[10px]",
+                  activeTab === tab ? "bg-white/20" : "bg-gray-100"
+                )}>
+                  {/* Dynamically access the count using key */}
+                  {counts[tab === "all" ? "all" : tab] || 0}
+                </span>
+              </Button>
+            ))}
+          </div>
 
-        {/* Search & Filters */}
-        <Card className="border-none shadow-sm bg-white">
+          {/* Search & Filters */}
+          <Card className="border-none shadow-sm bg-white">
           <CardContent className="p-4 flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
@@ -352,16 +340,14 @@ export default function Registrations() {
                               </div>
                             </div>
                           </div>
-                          {activeTab === "all" && (
-                            <Badge className={cn(
-                              "font-bold capitalize",
-                              reg.status === "approved" || reg.status === "completed" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" :
-                              reg.status === "rejected" ? "bg-red-100 text-red-700 hover:bg-red-100" :
-                              "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
-                            )}>
-                              {reg.status}
-                            </Badge>
-                          )}
+                          <Badge className={cn(
+                            "font-bold capitalize",
+                            reg.status === "approved" || reg.status === "completed" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" :
+                            reg.status === "rejected" ? "bg-red-100 text-red-700 hover:bg-red-100" :
+                            "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
+                          )}>
+                            {reg.status}
+                          </Badge>
                         </div>
 
                         {/* Contact Details */}
@@ -476,6 +462,40 @@ export default function Registrations() {
             </div>
           </div>
         )}
+        </div>
+
+          {/* Navigation Sidebar */}
+          <div className="w-64 shrink-0">
+            <Card className="border-none shadow-sm bg-white p-4 sticky top-24">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Navigation</h3>
+              <div className="space-y-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => setLocation("/admin/dashboard")}
+                  className="w-full justify-start h-12 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  <BarChart3 className="w-5 h-5 mr-3" />
+                  Dashboard
+                </Button>
+                <Button
+                  variant="default"
+                  className="w-full justify-start h-12 px-4 text-sm font-bold bg-red-600 hover:bg-red-700 text-white"
+                >
+                  <Users className="w-5 h-5 mr-3" />
+                  Registrations
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setLocation("/admin/verify")}
+                  className="w-full justify-start h-12 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  <Shield className="w-5 h-5 mr-3" />
+                  Verify
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </div>
       </main>
 
       {/* Approval Modal */}
