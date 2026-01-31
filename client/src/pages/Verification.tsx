@@ -188,53 +188,46 @@ export default function Verification() {
 
 
   // 3. Complete Donation Action
-  const handleComplete = async () => {
-    if (!selectedDonor) return;
-
-    if (collectedSuccess === "no") {
-      setStep(4); // Move to rejection flow
-      return;
-    }
-
+  const handleComplete = async (donor: Donor) => {
     setActionLoading(true);
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
+      const API_BASE =
+        import.meta.env.VITE_API_URL || "http://localhost:10000/api/donate";
 
       const response = await fetch(`${API_BASE}/verify/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ donorId: selectedDonor.id })
+        body: JSON.stringify({ donorId: donor.id }),
       });
 
-      if (!response.ok) throw new Error("Failed to complete donation");
+      if (!response.ok) throw new Error("Failed");
 
-      // Success - refresh and reset without showing modal
+      // ✅ update UI immediately
+      setDonors(prev => prev.filter(d => d.id !== donor.id));
       fetchTodayCount();
+
       toast({
         title: "Donation Completed!",
-        description: `${selectedDonor.name}'s donation has been recorded successfully.`,
+        description: `${donor.name}'s donation recorded successfully.`,
       });
+
       confetti({
-        particleCount: 150,
+        particleCount: 120,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ["#DC2626", "#FCA5A5", "#FFFFFF"]
       });
-      reset();
 
-      // Refresh list to remove completed donor
-      setDonors(prev => prev.filter(d => d.id !== selectedDonor.id));
-
-    } catch (error) {
+    } catch (err) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Could not mark donation as completed.",
+        description: "Could not complete donation",
       });
     } finally {
       setActionLoading(false);
     }
   };
+
 
   // 4. Reject/Unable to Donate Action
   const handleRejection = async () => {
@@ -481,12 +474,21 @@ export default function Verification() {
                               </div>
 
                               <Button
+                                disabled={actionLoading}
                                 className="w-full h-11 bg-red-600 hover:bg-red-700 font-bold rounded-lg shadow-md"
-                                onClick={() => openVerification(donor)}
-
+                                onClick={() => handleComplete(donor)}
                               >
-                                <CheckCircle2 className="w-4 h-4 mr-2" /> Confirm Donation
+                                {actionLoading ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <>
+                                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                                    Confirm Donation
+                                  </>
+                                )}
                               </Button>
+
+
                             </CardContent>
                           </Card>
                         </motion.div>
@@ -650,10 +652,11 @@ export default function Verification() {
             </Card>
           </div>
         </div>
-      </main>
+      </main >
 
       {/* Step 1: Identity Verification Modal */}
-      <Dialog open={step === 1} onOpenChange={(open) => !open && reset()}>
+      < Dialog open={step === 1
+      } onOpenChange={(open) => !open && reset()}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Verify Donor Identity</DialogTitle>
@@ -692,10 +695,10 @@ export default function Verification() {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog >
 
       {/* Step 2: Donation Completion Modal */}
-      <Dialog open={step === 2} onOpenChange={(open) => !open && reset()}>
+      < Dialog open={step === 2} onOpenChange={(open) => !open && reset()}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Complete Donation</DialogTitle>
@@ -748,15 +751,16 @@ export default function Verification() {
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="ghost" onClick={reset}>Cancel</Button>
-            <Button className="bg-red-600 hover:bg-red-700 px-8 font-bold" onClick={handleComplete} disabled={actionLoading}>
+            <Button className="bg-red-600 hover:bg-red-700 px-8 font-bold" onClick={() => selectedDonor && handleComplete(selectedDonor)}
+               disabled={actionLoading}>
               {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (collectedSuccess === "yes" ? "Complete Donation" : "Next")}
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog >
 
       {/* Variant: Rejected Modal (simplified) */}
-      <Dialog open={step === 4} onOpenChange={(open) => !open && reset()}>
+      < Dialog open={step === 4} onOpenChange={(open) => !open && reset()}>
         <DialogContent className="sm:max-w-md text-center py-10">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-red-600">Donation Rejected</DialogTitle>
@@ -793,10 +797,10 @@ export default function Verification() {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog >
 
       {/* Final Step: Success Modal */}
-      <Dialog open={step === 3} onOpenChange={(open) => !open && reset()}>
+      < Dialog open={step === 3} onOpenChange={(open) => !open && reset()}>
         <DialogContent className="sm:max-w-md text-center py-10 overflow-hidden">
           <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="space-y-6">
             <div className="mx-auto w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center">
@@ -834,7 +838,7 @@ export default function Verification() {
             </div>
           </motion.div>
         </DialogContent>
-      </Dialog>
-    </div>
+      </Dialog >
+    </div >
   );
 }
