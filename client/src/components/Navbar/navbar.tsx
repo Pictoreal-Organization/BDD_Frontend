@@ -173,8 +173,9 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
+            {/* Logo */}
             {/* <Link href="/"> */}
-            <Link href="https://pictoreal.in">
+            <a href="https://pictoreal.in">
               <div className="cursor-pointer">
                 <img
                     src="/pictoreal.png"
@@ -184,7 +185,7 @@ export default function Navbar() {
                     className="object-contain"
                 />
               </div>
-            </Link>
+            </a>
 
             {/* Desktop Nav */}
             <div className="hidden md:flex flex-grow justify-center">
@@ -199,7 +200,7 @@ export default function Navbar() {
                       : index === activeIndex;
 
                   return (
-                    <Link
+                    <a
                       key={link.text}
                       href={link.href}
                       ref={(el: HTMLAnchorElement | null) => {
@@ -211,7 +212,7 @@ export default function Navbar() {
                       }`}
                     >
                       {link.text}
-                    </Link>
+                    </a>
                   );
                 })}
 
@@ -226,13 +227,20 @@ export default function Navbar() {
               </div>
             </div>
 
-             <Button 
+             {/* <Button 
                             size="lg" 
                             className="bg-red-600 text-white hover:bg-red-700 h-12 px-8 text-lg font-semibold shadow-lg shadow-red-200 rounded-full transition-all hover:scale-105" 
                             onClick={() => setLocation("/register")}
                         >
                             Register Now
-                        </Button>
+                        </Button> */}
+              <Button 
+  size="lg" 
+  className="bg-red-600 text-white hover:bg-red-700 font-semibold shadow-lg shadow-red-200 rounded-full transition-all hover:scale-105 md:h-12 md:px-8 md:text-lg h-8 px-3 text-xs" 
+  onClick={() => setLocation("/register")}
+>
+  Register Now
+</Button>
 
             {/* Mobile Toggle */}
             <button
@@ -259,14 +267,14 @@ export default function Navbar() {
       >
         <div className="p-6 space-y-4 flex flex-col items-center">
           {navLinks.map((link) => (
-            <Link key={link.text} href={link.href}>
-                <a 
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="block w-full text-center py-3 rounded-2xl hover:bg-red-50 text-gray-800 hover:text-red-600 font-medium transition-colors"
-                >
-                    {link.text}
-                </a>
-            </Link>
+            <a 
+                key={link.text} 
+                href={link.href}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block w-full text-center py-3 rounded-2xl hover:bg-red-50 text-gray-800 hover:text-red-600 font-medium transition-colors"
+            >
+                {link.text}
+            </a>
           ))}
           <div className="pt-2">
             <ArrowBtn 
