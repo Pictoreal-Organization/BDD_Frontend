@@ -61,14 +61,6 @@ const formSchema = z.object({
   bloodGroup: z.string().min(1, "Select blood group"),
   agreeTerms: z.boolean().refine(v => v === true, "You must agree to terms"),
   certifyInfo: z.boolean().refine(v => v === true, "You must certify your info"),
-}).refine((data) => {
-  if (data.category === "Student" && !data.year) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Year is required for students",
-  path: ["year"],
 });
 
 export default function Register() {
@@ -84,6 +76,8 @@ export default function Register() {
     watch,
     setValue,
     trigger,
+    setError,
+    clearErrors,
     formState: { errors, isValid },
   } = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -99,14 +93,31 @@ export default function Register() {
   const weight = watch("weight");
 
   const nextStep = async () => {
-    let fieldsToValidate: any[] = [];
-    if (step === 1) {
-      fieldsToValidate = ["fullName", "email", "mobile", "category", "branch"];
-      if (category === "Student") fieldsToValidate.push("year");
+    const step1Fields: any[] = ["fullName", "email", "mobile", "category", "branch"];
+    const baseValid = await trigger(step1Fields);
+
+    let studentValid = true;
+    if (category === "Student") {
+      // year and rollNo are .optional() in the schema so trigger() will never
+      // fail on them. We validate them manually and use setError/clearErrors.
+      const currentYear = watch("year");
+      if (!currentYear) {
+        setError("year", { type: "required", message: "Academic year is required" });
+        studentValid = false;
+      } else {
+        clearErrors("year");
+      }
+
+      const currentRollNo = watch("rollNo");
+      if (!currentRollNo || currentRollNo.trim() === "") {
+        setError("rollNo", { type: "required", message: "Roll number is required" });
+        studentValid = false;
+      } else {
+        clearErrors("rollNo");
+      }
     }
 
-    const isStepValid = await trigger(fieldsToValidate);
-    if (isStepValid) setStep(step + 1);
+    if (baseValid && studentValid) setStep(step + 1);
   };
 
   const prevStep = () => setStep(step - 1);
@@ -123,7 +134,7 @@ export default function Register() {
         age: data.age,
         bloodGroup: data.bloodGroup,
         weight: data.weight,
-        rollNo: data.rollNo // Included just in case backend uses it later
+        rollNo: data.rollNo
       };
 
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
@@ -295,7 +306,7 @@ export default function Register() {
                     </div>
                   </div>
 
-                  {/* YEAR (Conditional for Students) */}
+                  {/* YEAR & ROLL NO (Conditional for Students) */}
                   {category === "Student" && (
                     <motion.div 
                       initial={{ opacity: 0, height: 0 }}
@@ -304,7 +315,7 @@ export default function Register() {
                     >
                        <div className="space-y-2">
                         <Label htmlFor="year">Academic Year</Label>
-                        <Select onValueChange={(v) => setValue("year", v, { shouldValidate: true })}>
+                        <Select onValueChange={(v) => { setValue("year", v, { shouldValidate: true }); clearErrors("year"); }}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Year" />
                           </SelectTrigger>
@@ -319,11 +330,12 @@ export default function Register() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="rollNo">Roll No (Optional)</Label>
+                        <Label htmlFor="rollNo">Roll No</Label>
                         <div className="relative">
                           <Building2 className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-                          <Input id="rollNo" className="pl-10" placeholder="e.g. 31456" {...register("rollNo")} />
+                          <Input id="rollNo" className="pl-10" placeholder="e.g. 31456" {...register("rollNo", { onChange: () => clearErrors("rollNo") })} />
                         </div>
+                        {errors.rollNo && <p className="text-xs text-red-500">{errors.rollNo.message}</p>}
                       </div>
                     </motion.div>
                   )}
