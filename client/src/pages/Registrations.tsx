@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Search, 
-  Phone, 
-  Mail, 
-  CheckCircle2, 
-  XCircle, 
+import {
+  Search,
+  Phone,
+  Mail,
+  CheckCircle2,
+  XCircle,
   Droplet,
   Calendar,
   LogOut,
@@ -83,7 +83,7 @@ const getTimeAgo = (dateString: string): string => {
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
-  
+
   if (minutes < 1) return "Just now";
   if (minutes < 60) return `${minutes} min${minutes > 1 ? 's' : ''} ago`;
   if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
@@ -117,7 +117,7 @@ export default function Registrations() {
     setLoading(true);
     try {
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/donate';
-      
+
       // Build Query Params
       const params = new URLSearchParams({
         status: activeTab,
@@ -130,11 +130,11 @@ export default function Registrations() {
       if (categoryFilter) params.append("category", categoryFilter);
 
       const response = await fetch(`${API_BASE}/registrations?${params.toString()}`);
-      
+
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const data: ApiResponse = await response.json();
-      
+
       setRegistrations(data.donors);
       setCounts(data.counts);
       setTotalPages(data.pagination.totalPages);
@@ -161,7 +161,7 @@ export default function Registrations() {
     setActionLoading(true);
     try {
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
-      
+
       const response = await fetch(`${API_BASE}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -238,231 +238,239 @@ export default function Registrations() {
           <div className="flex-1 space-y-6">
             {/* Status Tabs */}
             <div className="flex flex-wrap gap-2">
-            {(["pending", "approved", "rejected", "all"] as Tab[]).map((tab) => (
-              <Button
-                key={tab}
-                variant={activeTab === tab ? "default" : "outline"}
-                onClick={() => { setActiveTab(tab); setPage(1); }}
-                className={cn(
-                  "rounded-full px-6 h-10 font-bold transition-all capitalize",
-                  activeTab === tab ? "bg-red-600 hover:bg-red-700 shadow-lg" : "bg-white text-gray-600"
-                )}
-              >
-                {tab}
-                <span className={cn(
-                  "ml-2 px-2 py-0.5 rounded-full text-[10px]",
-                  activeTab === tab ? "bg-white/20" : "bg-gray-100"
-                )}>
-                  {/* Dynamically access the count using key */}
-                  {counts[tab === "all" ? "all" : tab] || 0}
-                </span>
-              </Button>
-            ))}
-          </div>
-
-          {/* Search & Filters */}
-          <Card className="border-none shadow-sm bg-white">
-          <CardContent className="p-4 flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-              <Input 
-                placeholder="Search by name, email, mobile..." 
-                className="pl-10 h-11"
-                value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
-              />
+              {(["pending", "approved", "rejected", "all"] as Tab[]).map((tab) => (
+                <Button
+                  key={tab}
+                  variant={activeTab === tab ? "default" : "outline"}
+                  onClick={() => { setActiveTab(tab); setPage(1); }}
+                  className={cn(
+                    "rounded-full px-6 h-10 font-bold transition-all capitalize",
+                    activeTab === tab ? "bg-red-600 hover:bg-red-700 shadow-lg" : "bg-white text-gray-600"
+                  )}
+                >
+                  {tab}
+                  <span className={cn(
+                    "ml-2 px-2 py-0.5 rounded-full text-[10px]",
+                    activeTab === tab ? "bg-white/20" : "bg-gray-100"
+                  )}>
+                    {/* Dynamically access the count using key */}
+                    {counts[tab === "all" ? "all" : tab] || 0}
+                  </span>
+                </Button>
+              ))}
             </div>
-            <div className="flex gap-2">
-              <Select value={bloodFilter} onValueChange={(v) => { setBloodFilter(v); setPage(1); }}>
-                <SelectTrigger className="w-[140px] h-11">
-                  <SelectValue placeholder="Blood Group" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="All">All Groups</SelectItem>
-                  {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(g => (
-                    <SelectItem key={g} value={g}>{g}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); setPage(1); }}>
-                <SelectTrigger className="w-[140px] h-11">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="All">All Categories</SelectItem>
-                  <SelectItem value="Student">Student</SelectItem>
-                  <SelectItem value="Faculty">Faculty</SelectItem>
-                  <SelectItem value="Staff">Staff</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Registration List */}
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="w-10 h-10 animate-spin text-red-600" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <AnimatePresence mode="popLayout">
-              {registrations.length > 0 ? (
-                registrations.map((reg) => (
-                  <motion.div
-                    key={reg.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    layout
+            {/* Search & Filters */}
+            <Card className="border-none shadow-sm bg-white">
+              <CardContent className="p-4 flex flex-col md:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by name, email, mobile..."
+                    className="pl-10 h-11"
+                    value={searchQuery}
+                    onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Select
+                    value={bloodFilter}
+                    onValueChange={(v) => {
+                      setBloodFilter(v === "all" ? "" : v);
+                      setPage(1);
+                    }}
                   >
-                    <Card className="border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-                      <CardContent className="p-6 flex flex-col h-full">
-                        {/* Header */}
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-red-600 font-bold text-xl shrink-0">
-                              {reg.bloodGroup}
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-display font-bold text-gray-900 line-clamp-1" title={reg.name}>{reg.name}</h3>
-                              <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                                <span>{reg.age} Yrs</span>
-                                <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                                <span>{reg.category}</span>
-                                {reg.branch && (
-                                  <>
+
+                    <SelectTrigger className="w-[140px] h-11">
+                      <SelectValue placeholder="Blood Group" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Groups</SelectItem>
+                      {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(g => (
+                        <SelectItem key={g} value={g}>{g}</SelectItem>
+                      ))}
+                    </SelectContent>
+
+                  </Select>
+
+                  <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); setPage(1); }}>
+                    <SelectTrigger className="w-[140px] h-11">
+                      <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="All">All Categories</SelectItem>
+                      <SelectItem value="Student">Student</SelectItem>
+                      <SelectItem value="Faculty">Faculty</SelectItem>
+                      <SelectItem value="Staff">Staff</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Registration List */}
+            {loading ? (
+              <div className="flex justify-center items-center py-20">
+                <Loader2 className="w-10 h-10 animate-spin text-red-600" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <AnimatePresence mode="popLayout">
+                  {registrations.length > 0 ? (
+                    registrations.map((reg) => (
+                      <motion.div
+                        key={reg.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        layout
+                      >
+                        <Card className="border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+                          <CardContent className="p-6 flex flex-col h-full">
+                            {/* Header */}
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-red-600 font-bold text-xl shrink-0">
+                                  {reg.bloodGroup}
+                                </div>
+                                <div>
+                                  <h3 className="text-lg font-display font-bold text-gray-900 line-clamp-1" title={reg.name}>{reg.name}</h3>
+                                  <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                                    <span>{reg.age} Yrs</span>
                                     <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                                    <span>{reg.branch}</span>
-                                  </>
-                                )}
+                                    <span>{reg.category}</span>
+                                    {reg.branch && (
+                                      <>
+                                        <span className="w-1 h-1 bg-gray-300 rounded-full" />
+                                        <span>{reg.branch}</span>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <Badge className={cn(
+                                "font-bold capitalize",
+                                reg.status === "approved" || reg.status === "completed" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" :
+                                  reg.status === "rejected" ? "bg-red-100 text-red-700 hover:bg-red-100" :
+                                    "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
+                              )}>
+                                {reg.status}
+                              </Badge>
+                            </div>
+
+                            {/* Contact Details */}
+                            <div className="space-y-2 mb-4">
+                              <div className="flex items-center gap-2 text-sm">
+                                <Phone className="w-4 h-4 text-gray-400 shrink-0" />
+                                <span className="text-gray-700 truncate">{reg.phoneNumber}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm">
+                                <Mail className="w-4 h-4 text-gray-400 shrink-0" />
+                                <span className="text-gray-700 truncate" title={reg.email}>{reg.email}</span>
                               </div>
                             </div>
-                          </div>
-                          <Badge className={cn(
-                            "font-bold capitalize",
-                            reg.status === "approved" || reg.status === "completed" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" :
-                            reg.status === "rejected" ? "bg-red-100 text-red-700 hover:bg-red-100" :
-                            "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
-                          )}>
-                            {reg.status}
-                          </Badge>
-                        </div>
 
-                        {/* Contact Details */}
-                        <div className="space-y-2 mb-4">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Phone className="w-4 h-4 text-gray-400 shrink-0" />
-                            <span className="text-gray-700 truncate">{reg.phoneNumber}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Mail className="w-4 h-4 text-gray-400 shrink-0" />
-                            <span className="text-gray-700 truncate" title={reg.email}>{reg.email}</span>
-                          </div>
-                        </div>
+                            {/* Physical & Medical Info */}
+                            <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-gray-100">
+                              <div>
+                                <p className="text-xs text-muted-foreground uppercase tracking-wider">Weight</p>
+                                <p className="text-sm font-bold text-gray-900">{reg.weight} kg</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground uppercase tracking-wider">Medical</p>
+                                <p className="text-sm font-bold text-gray-900 truncate" title={reg.medicalConditions || "None"}>
+                                  {reg.medicalConditions || "None"}
+                                </p>
+                              </div>
+                            </div>
 
-                        {/* Physical & Medical Info */}
-                        <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-gray-100">
-                          <div>
-                            <p className="text-xs text-muted-foreground uppercase tracking-wider">Weight</p>
-                            <p className="text-sm font-bold text-gray-900">{reg.weight} kg</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground uppercase tracking-wider">Medical</p>
-                            <p className="text-sm font-bold text-gray-900 truncate" title={reg.medicalConditions || "None"}>
-                              {reg.medicalConditions || "None"}
-                            </p>
-                          </div>
-                        </div>
+                            {/* Eligibility Checklist */}
+                            <div className="space-y-2 mb-4">
+                              <div className={cn("flex items-center gap-2 text-sm", reg.age >= 18 && reg.age <= 65 ? "text-emerald-600" : "text-red-600")}>
+                                {reg.age >= 18 && reg.age <= 65 ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                                <span>Age eligible (18-65)</span>
+                              </div>
+                              <div className={cn("flex items-center gap-2 text-sm", reg.weight > 45 ? "text-emerald-600" : "text-red-600")}>
+                                {reg.weight > 45 ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                                <span>Weight eligible (&gt;45kg)</span>
+                              </div>
+                            </div>
 
-                        {/* Eligibility Checklist */}
-                        <div className="space-y-2 mb-4">
-                          <div className={cn("flex items-center gap-2 text-sm", reg.age >= 18 && reg.age <= 65 ? "text-emerald-600" : "text-red-600")}>
-                            {reg.age >= 18 && reg.age <= 65 ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-                            <span>Age eligible (18-65)</span>
-                          </div>
-                          <div className={cn("flex items-center gap-2 text-sm", reg.weight > 45 ? "text-emerald-600" : "text-red-600")}>
-                            {reg.weight > 45 ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-                            <span>Weight eligible (&gt;45kg)</span>
-                          </div>
-                        </div>
+                            {/* Registration Time */}
+                            <div className="mb-4 text-sm text-muted-foreground mt-auto">
+                              <Calendar className="w-4 h-4 inline mr-1" />
+                              Registered {getTimeAgo(reg.registeredAt)}
+                            </div>
 
-                        {/* Registration Time */}
-                        <div className="mb-4 text-sm text-muted-foreground mt-auto">
-                          <Calendar className="w-4 h-4 inline mr-1" />
-                          Registered {getTimeAgo(reg.registeredAt)}
-                        </div>
+                            {/* Action Buttons (Only for Pending) */}
+                            {reg.status === "pending" && (
+                              <div className="flex gap-2 mt-4 pt-4 border-t border-gray-50">
+                                <Button
+                                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-9"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setApproveModal(reg);
+                                  }}
+                                >
+                                  <CheckCircle2 className="w-4 h-4 mr-2" /> Approve
+                                </Button>
+                                <Button
+                                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold h-9"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setRejectModal(reg);
+                                  }}
+                                >
+                                  <XCircle className="w-4 h-4 mr-2" /> Reject
+                                </Button>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="col-span-full py-20 text-center">
+                      <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Search className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900">No registrations found</h3>
+                      <p className="text-gray-500">Try adjusting your filters or search query.</p>
+                    </div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
 
-                        {/* Action Buttons (Only for Pending) */}
-                        {reg.status === "pending" && (
-                          <div className="flex gap-2 mt-4 pt-4 border-t border-gray-50">
-                            <Button 
-                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-9"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setApproveModal(reg);
-                              }}
-                            >
-                              <CheckCircle2 className="w-4 h-4 mr-2" /> Approve
-                            </Button>
-                            <Button 
-                              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold h-9"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setRejectModal(reg);
-                              }}
-                            >
-                              <XCircle className="w-4 h-4 mr-2" /> Reject
-                            </Button>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))
-              ) : (
-                <div className="col-span-full py-20 text-center">
-                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Search className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900">No registrations found</h3>
-                  <p className="text-gray-500">Try adjusting your filters or search query.</p>
+            {/* Pagination */}
+            {registrations.length > 0 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8">
+                <p className="text-sm text-muted-foreground">
+                  Page {page} of {totalPages}
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-1" /> Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(p => p + 1)}
+                    disabled={page >= totalPages}
+                  >
+                    Next <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
                 </div>
-              )}
-            </AnimatePresence>
+              </div>
+            )}
           </div>
-        )}
-
-        {/* Pagination */}
-        {registrations.length > 0 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8">
-            <p className="text-sm text-muted-foreground">
-              Page {page} of {totalPages}
-            </p>
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-              >
-                <ChevronLeft className="w-4 h-4 mr-1" /> Previous
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setPage(p => p + 1)}
-                disabled={page >= totalPages}
-              >
-                Next <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
-          </div>
-        )}
-        </div>
 
           {/* Navigation Sidebar */}
           <div className="w-64 shrink-0">
@@ -509,8 +517,8 @@ export default function Registrations() {
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="ghost" onClick={() => setApproveModal(null)} disabled={actionLoading}>Cancel</Button>
-            <Button 
-              className="bg-emerald-600 hover:bg-emerald-700 px-8 font-bold" 
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700 px-8 font-bold"
               onClick={() => approveModal && updateStatus(approveModal, "approved")}
               disabled={actionLoading}
             >
@@ -558,12 +566,12 @@ export default function Registrations() {
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="ghost" onClick={() => setRejectModal(null)} disabled={actionLoading}>Cancel</Button>
-            <Button 
-              className="bg-red-600 hover:bg-red-700 px-8 font-bold" 
+            <Button
+              className="bg-red-600 hover:bg-red-700 px-8 font-bold"
               onClick={() => rejectModal && updateStatus(rejectModal, "rejected")}
               disabled={actionLoading}
             >
-               {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirm Rejection"}
+              {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirm Rejection"}
             </Button>
           </DialogFooter>
         </DialogContent>
