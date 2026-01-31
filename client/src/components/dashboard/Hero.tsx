@@ -13,13 +13,9 @@ export function Hero() {
     const fetchCount = async () => {
       try {
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
-        
-        // Fetch from dashboard stats
         const response = await fetch(`${API_BASE}/dashboard/stats`);
-        
         if (response.ok) {
           const data = await response.json();
-          // Use 'completed' count
           setDonorCount(data.completed || 0); 
         }
       } catch (error) {
@@ -28,17 +24,15 @@ export function Hero() {
         setLoading(false);
       }
     };
-
     fetchCount();
-    // Poll every 30 seconds for live updates
     const interval = setInterval(fetchCount, 30000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="relative w-full pt-0 md:pt-0 overflow-hidden bg-gradient-to-b from-white to-gray-50/50 pb-24">
+    <div className="relative w-full pt-0 overflow-hidden bg-gradient-to-b from-white to-gray-50/50 pb-24">
       
-      {/* --- BACKGROUND DOODLES SECTION --- */}
+      {/* --- BACKGROUND DOODLES --- */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none select-none z-0">
          <Droplet className="absolute top-12 left-[10%] w-16 h-16 text-red-200/40 rotate-12" strokeWidth={1.5} />
          <Plus className="absolute top-32 left-[25%] w-8 h-8 text-red-300/30 -rotate-12" strokeWidth={2} />
@@ -51,25 +45,29 @@ export function Hero() {
          <Plus className="absolute bottom-32 left-[40%] w-6 h-6 text-red-300/30 rotate-45" strokeWidth={2} />
       </div>
 
-      {/* 2. STATS VISUALIZATION Section */}
-      {/* Changed to flex-col to stack the circle and button vertically */}
+      {/* --- STATS SECTION --- */}
       <div className="relative z-10 w-full max-w-[1400px] mx-auto min-h-[500px] flex flex-col justify-center items-center mt-12 md:mt-20">
         
-        {/* --- LAYER B: The Two Logos (Left & Right) --- */}
-        {/* Added 'hidden md:flex' to hide on mobile */}
-        <div className="absolute inset-0 w-full hidden md:flex items-center justify-between px-[5%] md:px-[10%] lg:px-[18%] z-10 pointer-events-none top-[-50px]">
+        {/* LAYER B: THE LOGOS ("EARS")
+            - Mobile: Flex row, gap for mickey ears, z-0 to sit behind face
+            - Desktop: Absolute positioning to far sides
+        */}
+        <div className="
+            relative z-0 flex justify-center gap-32 mb-[-50px] 
+            md:absolute md:inset-0 md:justify-between md:px-[25%] md:items-center md:mb-0 md:gap-0 md:top-auto md:h-full pointer-events-none
+        ">
               
           {/* Left Logo: Pictoreal */}
           <motion.div 
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.8, type: "spring" }}
-            className="bg-white p-4 md:p-6 rounded-full shadow-2xl shadow-red-900/20 border-4 border-red-50 flex items-center justify-center transform hover:scale-110 transition-transform duration-300 pointer-events-auto"
+            className="bg-white p-2 md:p-6 rounded-full shadow-xl shadow-red-900/10 border-4 border-red-50 flex items-center justify-center transform hover:scale-110 transition-transform duration-300 pointer-events-auto flex-shrink-0"
           >
             <img 
               src="/Pictoreal.jpg.jpeg" 
               alt="Pictoreal Logo" 
-              className="w-16 h-16 md:w-32 md:h-32 rounded-full object-cover"
+              className="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover"
             />
           </motion.div>
 
@@ -78,17 +76,19 @@ export function Hero() {
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 1.0, type: "spring" }}
-            className="bg-white p-4 md:p-6 rounded-full shadow-2xl shadow-red-900/20 border-4 border-red-50 flex items-center justify-center transform hover:scale-110 transition-transform duration-300 pointer-events-auto"
+            className="bg-white p-2 md:p-6 rounded-full shadow-xl shadow-red-900/10 border-4 border-red-50 flex items-center justify-center transform hover:scale-110 transition-transform duration-300 pointer-events-auto flex-shrink-0"
           >
             <img 
               src="/Nss_logo.png" 
               alt="NSS Logo" 
-              className="w-16 h-16 md:w-32 md:h-32 rounded-full object-cover"
+              className="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover"
             />
           </motion.div>
         </div>
 
-        {/* --- LAYER C: Center "Total Donors" Circle (Floating on Top) --- */}
+        {/* LAYER C: TOTAL DONORS CIRCLE ("FACE") 
+            - Z-index 20 to sit ON TOP of the ears
+        */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -101,7 +101,7 @@ export function Hero() {
             {/* Inner Dashed Ring Decoration */}
             <div className="absolute inset-3 rounded-full border-2 border-dashed border-red-100 opacity-60 animate-spin-slow" style={{ animationDuration: '20s' }} />
             
-            <h3 className="text-gray-400 text-xs md:text-sm font-bold uppercase tracking-[0.2em] mb-3">
+            <h3 className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-900 font-display font-bold text-lg md:text-xl mb-2">
               Total Donors
             </h3>
 
@@ -114,8 +114,7 @@ export function Hero() {
                 )}
               </span>
               
-              {/* Trend Pill */}
-             
+              
             </div>
             
             {/* Subtle Pulse Behind */}
@@ -128,9 +127,9 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="flex flex-col items-center gap-4 z-20"
+            className="flex flex-col items-center gap-4 z-20 px-4 text-center"
         >
-            <p className="text-gray-500 font-medium text-lg">
+            <p className="text-gray-500 font-medium text-base md:text-lg">
                 If you want to donate blood, register here
             </p>
             <Button 
