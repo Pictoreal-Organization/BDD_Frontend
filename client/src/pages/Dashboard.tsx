@@ -51,7 +51,7 @@ export default function Dashboard() {
            transition={{ duration: 0.6 }}
         >
           {/* Main Headline */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-display mt-20 font-bold text-gray-900 leading-[1.1] mb-6 tracking-tight">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-display mt-12 lg:mt-20 font-bold text-gray-900 leading-[1.1] mb-6 tracking-tight">
             Donate Blood, <br className="hidden md:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-500">
               Save a Life Today.
