@@ -175,6 +175,49 @@ export default function AdminDashboard() {
     }
   };
 
+  // Export handlers
+  const handleExport = async (format: 'csv' | 'pdf' | 'excel') => {
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
+      const response = await fetch(`${API_BASE}/download/${format}`);
+      
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.statusText}`);
+      }
+
+      // Get filename from response headers or create default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = `blood_donation_registrations.${format}`;
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename=(.+)/);
+        if (match) filename = match[1].replace(/"/g, '');
+      }
+
+      // Download the file
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Export Successful",
+        description: `Data exported as ${format.toUpperCase()} successfully.`,
+      });
+    } catch (error: any) {
+      console.error(`Export ${format} error:`, error);
+      toast({
+        variant: "destructive",
+        title: "Export Failed",
+        description: error.message || `Could not export data as ${format.toUpperCase()}.`,
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50/50">
       {/* Top Bar */}
@@ -319,15 +362,27 @@ export default function AdminDashboard() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6 space-y-4">
-                    <Button variant="outline" className="w-full h-20 flex-col gap-2 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all">
+                    <Button 
+                      variant="outline" 
+                      className="w-full h-20 flex-col gap-2 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all"
+                      onClick={() => handleExport('csv')}
+                    >
                       <Table className="w-5 h-5" /> 
                       <span className="font-bold text-sm">Export as CSV</span>
                     </Button>
-                    <Button variant="outline" className="w-full h-20 flex-col gap-2 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all">
+                    <Button 
+                      variant="outline" 
+                      className="w-full h-20 flex-col gap-2 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all"
+                      onClick={() => handleExport('pdf')}
+                    >
                       <FileText className="w-5 h-5" /> 
                       <span className="font-bold text-sm">Export as PDF</span>
                     </Button>
-                    <Button variant="outline" className="w-full h-20 flex-col gap-2 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all">
+                    <Button 
+                      variant="outline" 
+                      className="w-full h-20 flex-col gap-2 rounded-xl border-2 border-gray-100 hover:border-red-100 hover:bg-red-50 hover:text-red-600 transition-all"
+                      onClick={() => handleExport('excel')}
+                    >
                       <BarChart3 className="w-5 h-5" /> 
                       <span className="font-bold text-sm">Export as Excel</span>
                     </Button>
