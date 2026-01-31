@@ -151,15 +151,22 @@ export default function Verification() {
 
       if (!response.ok) throw new Error("Failed to complete donation");
 
-      // Success UI
-      setStep(3);
-      fetchTodayCount(); // Refresh stats
+      // Success - refresh and reset without showing modal
+      fetchTodayCount();
+      toast({
+        title: "Donation Completed!",
+        description: `${selectedDonor.name}'s donation has been recorded successfully.`,
+      });
       confetti({
         particleCount: 150,
         spread: 70,
         origin: { y: 0.6 },
         colors: ["#DC2626", "#FCA5A5", "#FFFFFF"]
       });
+      reset();
+      
+      // Refresh list to remove completed donor
+      setDonors(prev => prev.filter(d => d.id !== selectedDonor.id));
 
     } catch (error) {
       toast({

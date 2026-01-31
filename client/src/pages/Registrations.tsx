@@ -487,14 +487,6 @@ export default function Registrations() {
               Confirming registration for <span className="font-bold text-gray-900">{approveModal?.name}</span> ({approveModal?.bloodGroup}).
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4 space-y-4">
-            <div className="flex items-start space-x-2">
-              <Checkbox id="send-email" defaultChecked />
-              <Label htmlFor="send-email" className="text-sm font-normal leading-tight">
-                Send approval email to donor automatically.
-              </Label>
-            </div>
-          </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="ghost" onClick={() => setApproveModal(null)} disabled={actionLoading}>Cancel</Button>
             <Button 
