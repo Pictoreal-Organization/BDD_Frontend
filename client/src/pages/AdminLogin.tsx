@@ -5,53 +5,62 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Shield, User, Lock, Eye, EyeOff, Activity, Heart, BarChart3, Droplet } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  const [loading, setLoading] = useState(false);
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
+    const [loading, setLoading] = useState(false);
+    
+    const navigate = useNavigate();
 
-  const [, setLocation] = useLocation();
 
   const handleLogin = async (): Promise<void> => {
-    setLoading(true);
-    try {
-      // Use relative path for same-origin requests (works in both dev and production)
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
-      const apiUrl = `${API_BASE}/admin/login`;
-      
-      const res = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+  setLoading(true);
 
-      if (!res.ok) {
-        const data = await res.json();
-        alert(data.message || "Invalid credentials");
-        setLoading(false);
-        return;
-      }
+  try {
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
+    const res = await fetch(`${API_BASE}/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
 
-      const data = await res.json();
+      // REQUIRED for passport sessions
+      credentials: "include",
 
-      if (data.token) {
-        localStorage.setItem("adminToken", data.token);
-        setLocation("/admin/dashboard");
-      } else {
-        alert("Invalid credentials");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      alert("Login failed. Please check your connection and try again.");
-    } finally {
-      setLoading(false);
+      body: JSON.stringify({
+        username: email,   // passport-local expects "username"
+        password: password,
+      }),
+    });
+
+    const data = await res.json();
+    alert(data.message || "Login successful");
+
+    console.log(data);
+    
+    localStorage.setItem("adminToken", "token");
+
+    if (!res.ok) {
+      alert(data.message || "Invalid credentials");
+      return;
     }
-  };
+
+    navigate("/admin/dashboard");
+
+    
+} catch (error) {
+    console.error("Login error:", error);
+    alert("Login failed");
+} finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex">
