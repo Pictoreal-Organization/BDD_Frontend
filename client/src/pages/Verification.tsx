@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Search, 
-  Droplet, 
-  CheckCircle2, 
+import {
+  Search,
+  Droplet,
+  CheckCircle2,
   ArrowRight,
   Phone,
   Calendar,
@@ -72,10 +72,10 @@ interface Donor {
 export default function Verification() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  
+
   // View State
   const [activeView, setActiveView] = useState<ViewTab>("verify");
-  
+
   // Data States
   const [searchQuery, setSearchQuery] = useState("");
   const [donors, setDonors] = useState<Donor[]>([]);
@@ -84,14 +84,14 @@ export default function Verification() {
   const [todayCount, setTodayCount] = useState(0);
   const [completedPage, setCompletedPage] = useState(1);
   const [completedTotalPages, setCompletedTotalPages] = useState(1);
-  
+
   // Loading States
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
   // Modal States
   const [step, setStep] = useState<number>(0); // 0: None, 1: Identity, 2: Completion, 3: Success, 4: Unable
-  
+
   // Form States
   const [collectedSuccess, setCollectedSuccess] = useState<string>("yes");
   const [units, setUnits] = useState<string>("1");
@@ -114,30 +114,20 @@ export default function Verification() {
   }, []);
 
   // 2. Search Donors (Debounced or on Effect)
-  useEffect(() => {
-    const fetchDonors = async () => {
-      setLoading(true);
-      try {
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
-        const params = new URLSearchParams({ query: searchQuery });
-        const response = await fetch(`${API_BASE}/verify/search?${params.toString()}`);
-        
-        if (response.ok) {
-          const data = await response.json();
-          setDonors(data.donors);
-        }
-      } catch (error) {
-        console.error("Error searching donors:", error);
-      } finally {
-        setLoading(false);
+
+  const fetchDonors = useCallback(async () => {
+    setLoading(true);
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
+      const params = new URLSearchParams({ query: searchQuery });
+      const response = await fetch(`${API_BASE}/verify/search?${params.toString()}`);
+      if (response.ok) {
+        const data = await response.json();
+        setDonors(data.donors);
       }
-    };
-
-    const timeoutId = setTimeout(() => {
-      fetchDonors();
-    }, 500); // 500ms debounce
-
-    return () => clearTimeout(timeoutId);
+    } finally {
+      setLoading(false);
+    }
   }, [searchQuery]);
 
   // 3. Fetch Completed Donations
@@ -149,11 +139,11 @@ export default function Verification() {
         status: "completed",
         page: completedPage.toString(),
         limit: "10",
-        sortBy: "updatedAt",
+        sortBy: "completedAt",
         sortOrder: "desc"
       });
       const response = await fetch(`${API_BASE}/registrations?${params.toString()}`);
-      
+
       if (response.ok) {
         const data = await response.json();
         console.log('Completed donors data:', data.donors); // Debug: Check what fields are available
@@ -174,6 +164,15 @@ export default function Verification() {
       setLoading(false);
     }
   }, [completedPage]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      fetchDonors();
+    }, 400); // debounce search
+
+    return () => clearTimeout(timeout);
+  }, [fetchDonors]);
+
 
   // Initial Load
   useEffect(() => {
@@ -200,7 +199,7 @@ export default function Verification() {
     setActionLoading(true);
     try {
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
-      
+
       const response = await fetch(`${API_BASE}/verify/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -222,7 +221,7 @@ export default function Verification() {
         colors: ["#DC2626", "#FCA5A5", "#FFFFFF"]
       });
       reset();
-      
+
       // Refresh list to remove completed donor
       setDonors(prev => prev.filter(d => d.id !== selectedDonor.id));
 
@@ -244,12 +243,12 @@ export default function Verification() {
     setActionLoading(true);
     try {
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
-      
+
       // We use the status update endpoint to move them to 'rejected'
       const response = await fetch(`${API_BASE}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           donorIds: [selectedDonor.id],
           status: "rejected"
         })
@@ -262,7 +261,7 @@ export default function Verification() {
         description: "Donor marked as unable to donate.",
       });
       reset();
-      
+
       // Refresh list to remove the rejected donor
       setDonors(prev => prev.filter(d => d.id !== selectedDonor.id));
 
@@ -318,7 +317,7 @@ export default function Verification() {
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
-    
+
     if (minutes < 1) return "Just now";
     if (minutes < 60) return `${minutes} min${minutes > 1 ? 's' : ''} ago`;
     if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
@@ -356,270 +355,268 @@ export default function Verification() {
           <div className="flex-1 space-y-8">
             {/* View Switcher */}
             <div className="flex gap-2">
-            <Button
-              variant={activeView === "verify" ? "default" : "outline"}
-              onClick={() => setActiveView("verify")}
-              className={cn(
-                "rounded-full px-6 h-10 font-bold transition-all",
-                activeView === "verify" ? "bg-red-600 hover:bg-red-700 shadow-lg" : "bg-white text-gray-600"
-              )}
-            >
-              Verify Donors
-            </Button>
-            <Button
-              variant={activeView === "completed" ? "default" : "outline"}
-              onClick={() => setActiveView("completed")}
-              className={cn(
-                "rounded-full px-6 h-10 font-bold transition-all",
-                activeView === "completed" ? "bg-red-600 hover:bg-red-700 shadow-lg" : "bg-white text-gray-600"
-              )}
-            >
-              Completed Donations
-            </Button>
-          </div>
-
-        {activeView === "verify" ? (
-          <>
-        {/* Search Bar */}
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
-            <Input 
-              placeholder="Search Approved Donor (Name, Mobile, or Roll No)..." 
-              // placeholder="Search Approved Donor (Name, Mobile, or Roll No)..." 
-              className="pl-12 h-14 text-lg rounded-2xl border-gray-200 shadow-sm bg-white"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <Button className="h-14 w-14 rounded-2xl bg-red-600 hover:bg-red-700 shadow-lg">
-            {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Search className="w-6 h-6" />}
-          </Button>
-        </div>
-
-        {/* Donor List */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-display font-bold text-gray-800 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-gray-400" /> Completed Today ({todayCount})
-            </h2>
-            <div className="text-sm text-gray-500">
-              Found {donors.length} eligible donors
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading ? (
-               <div className="flex justify-center items-center py-20 col-span-full">
-                <Loader2 className="w-10 h-10 animate-spin text-red-600" />
-              </div>
-            ) : donors.length > 0 ? (
-              donors.map((donor) => (
-                <motion.div key={donor.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}>
-                  <Card className="border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-                    <CardContent className="p-6 flex flex-col h-full">
-                      {/* Header */}
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-red-600 font-bold text-xl shrink-0">
-                            {donor.bloodGroup}
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-display font-bold text-gray-900 line-clamp-1" title={donor.name}>{donor.name}</h3>
-                            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                              <span>{donor.age} Yrs</span>
-                              <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                              <span>{donor.year || "N/A"}</span>
-                              {donor.branch && (
-                                <>
-                                  <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                                  <span>{donor.branch}</span>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Contact Details */}
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Phone className="w-4 h-4 text-gray-400 shrink-0" />
-                          <span className="text-gray-700 truncate">{donor.phoneNumber}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Mail className="w-4 h-4 text-gray-400 shrink-0" />
-                          <span className="text-gray-700 truncate" title={donor.email}>{donor.email}</span>
-                        </div>
-                      </div>
-
-                      {/* Physical & Medical Info */}
-                      <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-gray-100">
-                        <div>
-                          <p className="text-xs text-muted-foreground uppercase tracking-wider">Weight</p>
-                          <p className="text-sm font-bold text-gray-900">{donor.weight} kg</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground uppercase tracking-wider">Medical</p>
-                          <p className="text-sm font-bold text-gray-900">N/A</p>
-                        </div>
-                      </div>
-
-                      {/* Eligibility Checklist */}
-                      <div className="space-y-2 mb-4 flex-grow">
-                        <div className={cn("flex items-center gap-2 text-sm", donor.age >= 18 && donor.age <= 65 ? "text-emerald-600" : "text-red-600")}>
-                          <CheckCircle2 className="w-4 h-4" />
-                          Age eligible (18-65)
-                        </div>
-                        <div className={cn("flex items-center gap-2 text-sm", donor.weight >= 45 ? "text-emerald-600" : "text-red-600")}>
-                          <CheckCircle2 className="w-4 h-4" />
-                          Weight eligible ({donor.weight >= 45 ? ">45kg" : "ineligible"})
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Calendar className="w-4 h-4 text-gray-400" />
-                          Registered {getTimeAgo(donor.registeredAt)}
-                        </div>
-                      </div>
-
-                      <Button 
-                        className="w-full h-11 bg-red-600 hover:bg-red-700 font-bold rounded-lg shadow-md"
-                        onClick={() => {
-                          setSelectedDonor(donor);
-                          handleComplete();
-                        }}
-                      >
-                        <CheckCircle2 className="w-4 h-4 mr-2" /> Confirm Donation
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))
-            ) : (
-              <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-gray-300">
-                <p className="text-gray-500">No approved donors found matching "{searchQuery}"</p>
-                <p className="text-sm text-gray-400 mt-1">Make sure the registration is approved in the dashboard first.</p>
-              </div>
-            )}
-          </div>
-        </div>
-          </>
-        ) : (
-          // Completed Donations Table View
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-display font-bold text-gray-800">
+              <Button
+                variant={activeView === "verify" ? "default" : "outline"}
+                onClick={() => setActiveView("verify")}
+                className={cn(
+                  "rounded-full px-6 h-10 font-bold transition-all",
+                  activeView === "verify" ? "bg-red-600 hover:bg-red-700 shadow-lg" : "bg-white text-gray-600"
+                )}
+              >
+                Verify Donors
+              </Button>
+              <Button
+                variant={activeView === "completed" ? "default" : "outline"}
+                onClick={() => setActiveView("completed")}
+                className={cn(
+                  "rounded-full px-6 h-10 font-bold transition-all",
+                  activeView === "completed" ? "bg-red-600 hover:bg-red-700 shadow-lg" : "bg-white text-gray-600"
+                )}
+              >
                 Completed Donations
-              </h2>
-              <div className="text-sm text-gray-500">
-                Total: {completedDonors.length} completed
-              </div>
+              </Button>
             </div>
 
-            {loading ? (
-              <div className="flex justify-center items-center py-20">
-                <Loader2 className="w-10 h-10 animate-spin text-red-600" />
-              </div>
-            ) : completedDonors.length > 0 ? (
+            {activeView === "verify" ? (
               <>
-                <Card className="border-none shadow-sm bg-white overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Sr. No</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Blood Group</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Name</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Age</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Category</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Branch</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Completed</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-100">
-                        <AnimatePresence mode="popLayout">
-                          {completedDonors.map((donor, index) => (
-                            <motion.tr
-                              key={donor.id}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0 }}
-                              transition={{ delay: index * 0.05 }}
-                              className="hover:bg-gray-50 transition-colors"
-                            >
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-bold text-gray-700">{(completedPage - 1) * 10 + index + 1}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center text-red-600 font-bold text-sm">
-                                  {donor.bloodGroup}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-bold text-gray-900">{donor.name}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-700">{donor.age} Yrs</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-700">{donor.year}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-700">{donor.branch || "-"}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-500">{getTimeAgo(donor.completedAt || donor.updatedAt || donor.registeredAt)}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 font-bold capitalize">
-                                  Completed
-                                </Badge>
-                              </td>
-                            </motion.tr>
-                          ))}
-                        </AnimatePresence>
-                      </tbody>
-                    </table>
+                {/* Search Bar */}
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
+                    <Input
+                      placeholder="Search Approved Donor (Name, Mobile, or Roll No)..."
+                      // placeholder="Search Approved Donor (Name, Mobile, or Roll No)..." 
+                      className="pl-12 h-14 text-lg rounded-2xl border-gray-200 shadow-sm bg-white"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
                   </div>
-                </Card>
+                  <Button className="h-14 w-14 rounded-2xl bg-red-600 hover:bg-red-700 shadow-lg">
+                    {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Search className="w-6 h-6" />}
+                  </Button>
+                </div>
 
-                {/* Pagination */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
-                  <p className="text-sm text-muted-foreground">
-                    Page {completedPage} of {completedTotalPages}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setCompletedPage(p => Math.max(1, p - 1))}
-                      disabled={completedPage === 1}
-                    >
-                      <ChevronLeft className="w-4 h-4 mr-1" /> Previous
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setCompletedPage(p => p + 1)}
-                      disabled={completedPage >= completedTotalPages}
-                    >
-                      Next <ChevronRight className="w-4 h-4 ml-1" />
-                    </Button>
+                {/* Donor List */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-display font-bold text-gray-800 flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-gray-400" /> Completed Today ({todayCount})
+                    </h2>
+                    <div className="text-sm text-gray-500">
+                      Found {donors.length} eligible donors
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {loading ? (
+                      <div className="flex justify-center items-center py-20 col-span-full">
+                        <Loader2 className="w-10 h-10 animate-spin text-red-600" />
+                      </div>
+                    ) : donors.length > 0 ? (
+                      donors.map((donor) => (
+                        <motion.div key={donor.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}>
+                          <Card className="border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+                            <CardContent className="p-6 flex flex-col h-full">
+                              {/* Header */}
+                              <div className="flex items-start justify-between mb-4">
+                                <div className="flex items-center gap-4">
+                                  <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-red-600 font-bold text-xl shrink-0">
+                                    {donor.bloodGroup}
+                                  </div>
+                                  <div>
+                                    <h3 className="text-lg font-display font-bold text-gray-900 line-clamp-1" title={donor.name}>{donor.name}</h3>
+                                    <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                                      <span>{donor.age} Yrs</span>
+                                      <span className="w-1 h-1 bg-gray-300 rounded-full" />
+                                      <span>{donor.year || "N/A"}</span>
+                                      {donor.branch && (
+                                        <>
+                                          <span className="w-1 h-1 bg-gray-300 rounded-full" />
+                                          <span>{donor.branch}</span>
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Contact Details */}
+                              <div className="space-y-2 mb-4">
+                                <div className="flex items-center gap-2 text-sm">
+                                  <Phone className="w-4 h-4 text-gray-400 shrink-0" />
+                                  <span className="text-gray-700 truncate">{donor.phoneNumber}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm">
+                                  <Mail className="w-4 h-4 text-gray-400 shrink-0" />
+                                  <span className="text-gray-700 truncate" title={donor.email}>{donor.email}</span>
+                                </div>
+                              </div>
+
+                              {/* Physical & Medical Info */}
+                              <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-gray-100">
+                                <div>
+                                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Weight</p>
+                                  <p className="text-sm font-bold text-gray-900">{donor.weight} kg</p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Medical</p>
+                                  <p className="text-sm font-bold text-gray-900">N/A</p>
+                                </div>
+                              </div>
+
+                              {/* Eligibility Checklist */}
+                              <div className="space-y-2 mb-4 flex-grow">
+                                <div className={cn("flex items-center gap-2 text-sm", donor.age >= 18 && donor.age <= 65 ? "text-emerald-600" : "text-red-600")}>
+                                  <CheckCircle2 className="w-4 h-4" />
+                                  Age eligible (18-65)
+                                </div>
+                                <div className={cn("flex items-center gap-2 text-sm", donor.weight >= 45 ? "text-emerald-600" : "text-red-600")}>
+                                  <CheckCircle2 className="w-4 h-4" />
+                                  Weight eligible ({donor.weight >= 45 ? ">45kg" : "ineligible"})
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                  <Calendar className="w-4 h-4 text-gray-400" />
+                                  Registered {getTimeAgo(donor.registeredAt)}
+                                </div>
+                              </div>
+
+                              <Button
+                                className="w-full h-11 bg-red-600 hover:bg-red-700 font-bold rounded-lg shadow-md"
+                                onClick={() => openVerification(donor)}
+
+                              >
+                                <CheckCircle2 className="w-4 h-4 mr-2" /> Confirm Donation
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      ))
+                    ) : (
+                      <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-gray-300">
+                        <p className="text-gray-500">No approved donors found matching "{searchQuery}"</p>
+                        <p className="text-sm text-gray-400 mt-1">Make sure the registration is approved in the dashboard first.</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </>
             ) : (
-              <div className="py-20 text-center bg-white rounded-2xl border border-dashed border-gray-300">
-                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle2 className="w-8 h-8 text-gray-400" />
+              // Completed Donations Table View
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-display font-bold text-gray-800">
+                    Completed Donations
+                  </h2>
+                  <div className="text-sm text-gray-500">
+                    Total: {completedDonors.length} completed
+                  </div>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">No completed donations</h3>
-                <p className="text-gray-500">Completed donations will appear here.</p>
+
+                {loading ? (
+                  <div className="flex justify-center items-center py-20">
+                    <Loader2 className="w-10 h-10 animate-spin text-red-600" />
+                  </div>
+                ) : completedDonors.length > 0 ? (
+                  <>
+                    <Card className="border-none shadow-sm bg-white overflow-hidden">
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead className="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Sr. No</th>
+                              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Blood Group</th>
+                              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Name</th>
+                              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Age</th>
+                              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Category</th>
+                              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Branch</th>
+                              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Completed</th>
+                              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-100">
+                            <AnimatePresence mode="popLayout">
+                              {completedDonors.map((donor, index) => (
+                                <motion.tr
+                                  key={donor.id}
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0 }}
+                                  transition={{ delay: index * 0.05 }}
+                                  className="hover:bg-gray-50 transition-colors"
+                                >
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm font-bold text-gray-700">{(completedPage - 1) * 10 + index + 1}</div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center text-red-600 font-bold text-sm">
+                                      {donor.bloodGroup}
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm font-bold text-gray-900">{donor.name}</div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm text-gray-700">{donor.age} Yrs</div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm text-gray-700">{donor.year}</div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm text-gray-700">{donor.branch || "-"}</div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm text-gray-500">{getTimeAgo(donor.completedAt || donor.updatedAt || donor.registeredAt)}</div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 font-bold capitalize">
+                                      Completed
+                                    </Badge>
+                                  </td>
+                                </motion.tr>
+                              ))}
+                            </AnimatePresence>
+                          </tbody>
+                        </table>
+                      </div>
+                    </Card>
+
+                    {/* Pagination */}
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+                      <p className="text-sm text-muted-foreground">
+                        Page {completedPage} of {completedTotalPages}
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCompletedPage(p => Math.max(1, p - 1))}
+                          disabled={completedPage === 1}
+                        >
+                          <ChevronLeft className="w-4 h-4 mr-1" /> Previous
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCompletedPage(p => p + 1)}
+                          disabled={completedPage >= completedTotalPages}
+                        >
+                          Next <ChevronRight className="w-4 h-4 ml-1" />
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="py-20 text-center bg-white rounded-2xl border border-dashed border-gray-300">
+                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle2 className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900">No completed donations</h3>
+                    <p className="text-gray-500">Completed donations will appear here.</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
-        </div>
 
           {/* Navigation Sidebar */}
           <div className="w-64 shrink-0">
