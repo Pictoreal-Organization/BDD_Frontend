@@ -168,7 +168,7 @@ export default function Navbar() {
             <Link href="/">
               <div className="cursor-pointer">
                 <img
-                    src="/navbar_logo.png"
+                    src="/pictoreal.png"
                     alt="Pictoreal Logo"
                     width={150}
                     height={32}
