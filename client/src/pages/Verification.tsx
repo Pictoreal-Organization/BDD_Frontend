@@ -149,7 +149,7 @@ export default function Verification() {
         status: "completed",
         page: completedPage.toString(),
         limit: "10",
-        sortBy: "updatedAt",
+        sortBy: "completedAt",
         sortOrder: "desc"
       });
       const response = await fetch(`${API_BASE}/registrations?${params.toString()}`);
