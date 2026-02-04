@@ -43,14 +43,14 @@ export default function Dashboard() {
         
         {/* PART 1: Hero */}
         <div className="container mx-auto px-4">
-          {/* <Hero /> */}
-          <div className="container mx-auto px-4 relative z-20 text-center mb-4 md:mb-8">
+          <Hero />
+          {/* <div className="container mx-auto px-4 relative z-20 text-center mb-4 md:mb-8">
         <motion.div
            initial={{ opacity: 0, y: 20 }}
            animate={{ opacity: 1, y: 0 }}
            transition={{ duration: 0.6 }}
         >
-          {/* Main Headline */}
+          
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-display mt-10 lg:mt-16 font-bold text-gray-900 leading-[1.1] mb-6 tracking-tight">
             Donate Blood, <br className="hidden md:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-500">
@@ -61,14 +61,14 @@ export default function Dashboard() {
             5th February 2026, A3 006 BCR, Starts 10 AM
           </h3>
           
-          {/* Subtitle */}
+          
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-4 leading-relaxed">
             Join the Blood Donation Drive at A3 building, room BCR, and save a life today. Your small act of kindness can make a huge difference.
           </p>
         </motion.div>
-      </div>
+      </div> */}
 
-      <div className="flex justify-center w-full mt-8 relative z-30"> 
+      {/* <div className="flex justify-center w-full mt-8 relative z-30"> 
         <Button 
           size="lg" 
           className="bg-red-600 text-white hover:bg-red-700 h-14 px-10 text-lg font-semibold shadow-xl shadow-red-200 whitespace-nowrap"
@@ -76,7 +76,7 @@ export default function Dashboard() {
         >
           Register Now
         </Button>
-      </div>
+      </div> */}
         </div>
 
         {/* PART 2: Stats Overview (New Section) */}
@@ -87,12 +87,12 @@ export default function Dashboard() {
         </div>
 
         {/* PART 3: Blood Grid */}
-        {/* <BloodGrid /> */}
+        <BloodGrid />
 
         {/* PART 4: Recent Donors */}
         <div className="container mx-auto px-4 mt-12 mb-12">
           <div className="max-w-6xl mx-auto">
-             {/* <RecentDonors /> */}
+             <RecentDonors />
           </div>
         </div>
 
