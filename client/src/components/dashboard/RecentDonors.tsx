@@ -8,7 +8,7 @@ interface Donation {
   _id: string;
   name: string;
   bloodGroup: string;
-  createdAt: string;
+  completedAt: string;
 }
 
 export function RecentDonors() {
@@ -159,7 +159,7 @@ export function RecentDonors() {
                         </span>
                       </TableCell>
                       <TableCell className="text-right text-muted-foreground text-sm whitespace-nowrap">
-                        {timeAgo(donation.createdAt)}
+                        {timeAgo(donation.completedAt)}
                       </TableCell>
                     </motion.tr>
                   ))}
