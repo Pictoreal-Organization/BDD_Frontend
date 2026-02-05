@@ -57,7 +57,7 @@ const formSchema = z.object({
   year: z.string().optional(),
   rollNo: z.string().optional(),
   age: z.coerce.number().min(18, "Minimum age is 18").max(65, "Maximum age is 65"),
-  weight: z.coerce.number().min(45, "Minimum weight is 45kg"),
+  weight: z.coerce.number().min(50, "Minimum weight is 50kg"),
   bloodGroup: z.string().min(1, "Select blood group"),
   agreeTerms: z.boolean().refine(v => v === true, "You must agree to terms"),
   certifyInfo: z.boolean().refine(v => v === true, "You must certify your info"),
@@ -361,8 +361,8 @@ export default function Register() {
                     <div className="space-y-2">
                       <Label htmlFor="weight">Weight (kg)</Label>
                       <Input id="weight" type="number" {...register("weight")} />
-                      {weight && weight < 45 && (
-                        <p className="text-xs text-red-500 font-medium">Ineligible: Min 45kg</p>
+                      {weight && weight < 50 && (
+                        <p className="text-xs text-red-500 font-medium">Ineligible: Min 50kg</p>
                       )}
                     </div>
                   </div>
@@ -388,7 +388,7 @@ export default function Register() {
                       <p className="font-semibold mb-1">Eligibility Criteria:</p>
                       <ul className="list-disc list-inside space-y-0.5 opacity-90">
                         <li>Age: 18-65 years</li>
-                        <li>Weight: Minimum 45 kg</li>
+                        <li>Weight: Minimum 50 kg</li>
                         <li>Gap: 3 months between donations</li>
                       </ul>
                     </div>

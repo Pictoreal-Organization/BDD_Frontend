@@ -463,9 +463,9 @@ export default function Verification() {
                                   <CheckCircle2 className="w-4 h-4" />
                                   Age eligible (18-65)
                                 </div>
-                                <div className={cn("flex items-center gap-2 text-sm", donor.weight >= 45 ? "text-emerald-600" : "text-red-600")}>
+                                <div className={cn("flex items-center gap-2 text-sm", donor.weight >= 50 ? "text-emerald-600" : "text-red-600")}>
                                   <CheckCircle2 className="w-4 h-4" />
-                                  Weight eligible ({donor.weight >= 45 ? ">45kg" : "ineligible"})
+                                  Weight eligible ({donor.weight >= 50 ? ">50kg" : "ineligible"})
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
                                   <Calendar className="w-4 h-4 text-gray-400" />
