@@ -414,9 +414,9 @@ export default function Registrations() {
                                 {reg.age >= 18 && reg.age <= 65 ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                                 <span>Age eligible (18-65)</span>
                               </div>
-                              <div className={cn("flex items-center gap-2 text-sm", reg.weight > 45 ? "text-emerald-600" : "text-red-600")}>
-                                {reg.weight > 45 ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-                                <span>Weight eligible (&gt;45kg)</span>
+                              <div className={cn("flex items-center gap-2 text-sm", reg.weight > 50 ? "text-emerald-600" : "text-red-600")}>
+                                {reg.weight > 50 ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                                <span>Weight eligible (&gt;50kg)</span>
                               </div>
                             </div>
 
