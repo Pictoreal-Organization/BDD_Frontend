@@ -129,16 +129,16 @@ export function Hero() {
             transition={{ delay: 0.6 }}
             className="flex flex-col items-center gap-4 z-20 px-4 text-center"
         >
-            <p className="text-gray-500 font-medium text-base md:text-lg">
+            {/* <p className="text-gray-500 font-medium text-base md:text-lg">
                 If you want to donate blood, register here
-            </p>
-            <Button 
+            </p> */}
+            {/* <Button 
                 size="lg" 
                 className="bg-red-600 text-white hover:bg-red-700 h-12 px-8 text-lg font-semibold shadow-lg shadow-red-200 rounded-full transition-all hover:scale-105" 
                 onClick={() => setLocation("/register")}
             >
                 Register Now
-            </Button>
+            </Button> */}
         </motion.div>
         
       </div>
