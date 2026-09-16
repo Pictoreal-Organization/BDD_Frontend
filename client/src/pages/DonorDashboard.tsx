@@ -117,7 +117,7 @@ export default function DonorDashboard() {
 
           {status === "APPROVED" && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <Card className="border-none shadow-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white overflow-hidden">
+              <Card className="border-none shadow-xl bg-gradient-to-br from-emerald-500 to-red-600 text-white overflow-hidden">
                 <CardContent className="p-8">
                   <div className="flex flex-col md:flex-row gap-8 items-start">
                     <div className="flex-1 space-y-4">
@@ -213,7 +213,7 @@ export default function DonorDashboard() {
                 </div>
               </div>
               <div className="bg-gray-50 p-4 rounded-xl flex items-center gap-4">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">24</div>
+                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 font-bold">24</div>
                 <div>
                   <p className="text-[10px] uppercase text-muted-foreground">Age</p>
                   <p className="font-bold">24 Years</p>

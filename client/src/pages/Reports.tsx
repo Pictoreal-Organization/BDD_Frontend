@@ -109,7 +109,7 @@ export default function Reports() {
           const completed = countData.approvedRegistrations || 0; // Using approved as proxy for completed/donated
           
           setStats([
-            { label: "Total Registrations", value: total.toString(), icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
+            { label: "Total Registrations", value: total.toString(), icon: Users, color: "text-red-600", bg: "bg-red-50" },
             { label: "Approved Donors", value: completed.toString(), icon: Droplet, color: "text-red-600", bg: "bg-red-50" },
             { label: "Pending Review", value: countData.pendingRegistrations.toString(), icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
             { label: "Lives Impacted", value: `~${completed * 3}`, icon: Heart, color: "text-pink-600", bg: "bg-pink-50" }, // Est. 3 lives per unit

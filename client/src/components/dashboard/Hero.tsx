@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, Droplet, Heart, HeartHandshake, Plus } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 
@@ -30,119 +30,97 @@ export function Hero() {
   }, []);
 
   return (
-    <div className="relative w-full pt-0 overflow-hidden bg-gradient-to-b from-white to-gray-50/50 pb-24">
+    <div className="relative w-full min-h-[85vh] flex items-center justify-center overflow-hidden mb-12 shadow-2xl">
       
-      {/* --- BACKGROUND DOODLES --- */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none select-none z-0">
-         <Droplet className="absolute top-12 left-[10%] w-16 h-16 text-red-200/40 rotate-12" strokeWidth={1.5} />
-         <Plus className="absolute top-32 left-[25%] w-8 h-8 text-red-300/30 -rotate-12" strokeWidth={2} />
-         <Heart className="absolute top-20 right-[15%] w-20 h-20 text-red-200/30 -rotate-6" strokeWidth={1.5} />
-         <Droplet className="absolute top-40 right-[30%] w-10 h-10 text-red-100/50 rotate-45" strokeWidth={2} />
-         <HeartHandshake className="absolute top-1/2 left-[5%] -translate-y-1/2 w-24 h-24 text-red-100/40 rotate-12" strokeWidth={1} />
-         <Plus className="absolute top-[60%] right-[10%] w-12 h-12 text-red-200/30 rotate-12" strokeWidth={1.5} />
-         <Heart className="absolute bottom-20 left-[20%] w-14 h-14 text-red-200/40 -rotate-12" strokeWidth={1.5} />
-         <Droplet className="absolute bottom-10 right-[25%] w-18 h-18 text-red-100/50 rotate-6" strokeWidth={1.5} />
-         <Plus className="absolute bottom-32 left-[40%] w-6 h-6 text-red-300/30 rotate-45" strokeWidth={2} />
-      </div>
+      {/* --- REAL BACKGROUND IMAGE --- */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ 
+          backgroundImage: `url('/BDD_image.jpeg')`,
+          backgroundAttachment: "fixed",
+          filter: "blur(8px)",
+          transform: "scale(1.05)"
+        }}
+      />
+      
+      {/* --- DARK OVERLAY --- */}
+      <div className="absolute inset-0 z-10 bg-black/60" />
 
-      {/* --- STATS SECTION --- */}
-      <div className="relative z-10 w-full max-w-[1400px] mx-auto min-h-[500px] flex flex-col justify-center items-center mt-12 md:mt-20">
+      {/* --- MAIN CONTENT --- */}
+      <div className="relative z-20 w-full max-w-6xl mx-auto px-4 py-12 text-center flex flex-col items-center">
         
-        {/* LAYER B: THE LOGOS ("EARS")
-            - Mobile: Flex row, gap for mickey ears, z-0 to sit behind face
-            - Desktop: Absolute positioning to far sides
-        */}
-        <div className="
-            relative z-0 flex justify-center gap-32 mb-[-50px] 
-            md:absolute md:inset-0 md:justify-between md:px-[25%] md:items-center md:mb-0 md:gap-0 md:top-auto md:h-full pointer-events-none
-        ">
-              
-          {/* Left Logo: Pictoreal */}
-          <motion.div 
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.8, type: "spring" }}
-            className="bg-white p-2 md:p-6 rounded-full shadow-xl shadow-red-900/10 border-4 border-red-50 flex items-center justify-center transform hover:scale-110 transition-transform duration-300 pointer-events-auto flex-shrink-0"
-          >
-            <img 
-              src="/Pictoreal.jpg.jpeg" 
-              alt="Pictoreal Logo" 
-              className="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover"
-            />
-          </motion.div>
-
-          {/* Right Logo: NSS */}
-          <motion.div 
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 1.0, type: "spring" }}
-            className="bg-white p-2 md:p-6 rounded-full shadow-xl shadow-red-900/10 border-4 border-red-50 flex items-center justify-center transform hover:scale-110 transition-transform duration-300 pointer-events-auto flex-shrink-0"
-          >
-            <img 
-              src="/Nss_logo.png" 
-              alt="NSS Logo" 
-              className="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover"
-            />
-          </motion.div>
-        </div>
-
-        {/* LAYER C: TOTAL DONORS CIRCLE ("FACE") 
-            - Z-index 20 to sit ON TOP of the ears
-        */}
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="relative z-20 mb-10"
+        {/* Logos */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex justify-center items-center gap-6 mb-8"
         >
-          {/* Main Circle Card */}
-          <div className="w-64 h-64 md:w-80 md:h-80 bg-white rounded-full shadow-[0_20px_50px_-10px_rgba(220,38,38,0.3)] flex flex-col items-center justify-center relative border-[8px] border-white ring-1 ring-gray-100">
-            
-            {/* Inner Dashed Ring Decoration */}
-            <div className="absolute inset-3 rounded-full border-2 border-dashed border-red-100 opacity-60 animate-spin-slow" style={{ animationDuration: '20s' }} />
-            
-            <h3 className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-900 font-display font-bold text-lg md:text-xl mb-2">
-              Total Donors
-            </h3>
+          <img 
+            src="/Pictoreal.jpg.jpeg" 
+            alt="Pictoreal Logo" 
+            className="w-16 h-16 md:w-24 md:h-24 rounded-full shadow-lg object-cover border-4 border-white"
+          />
+          <span className="text-white/60 font-bold text-xl px-2">✕</span>
+          <img 
+            src="/Nss_logo.png" 
+            alt="NSS Logo" 
+            className="w-16 h-16 md:w-24 md:h-24 rounded-full shadow-lg object-cover border-4 border-white bg-white"
+          />
+        </motion.div>
 
-            <div className="flex flex-col items-center">
-              <span className="text-7xl md:text-8xl font-display font-bold text-gray-900 leading-none tracking-tighter">
-                {loading ? (
-                  <span className="text-red-200 animate-pulse">...</span>
-                ) : (
-                  <span className="text-red-600 drop-shadow-sm">{donorCount}</span>
-                )}
-              </span>
-              
-              
-            </div>
-            
-            {/* Subtle Pulse Behind */}
-            <div className="absolute -inset-1 rounded-full bg-red-50 -z-10 animate-pulse" />
+        {/* Hero Text */}
+        <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-white leading-[1.1] mb-6 drop-shadow-md">
+            Donate Blood,
+            <span className="text-red-500"> Save a Life Today.</span>
+          </h1>
+          
+          {/* <p className="text-lg md:text-2xl text-gray-200 max-w-3xl mx-auto mb-12 font-light">
+            Join the Blood Donation Drive on <strong className="text-white font-bold">5th February 2026</strong> at A3 006 BCR.
+          </p> */}
+        </motion.div>
+
+        {/* --- MASSIVE LIVE COUNTER --- */}
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="mb-12 bg-black/40 backdrop-blur-md border border-white/10 p-6 md:p-8 rounded-2xl w-full max-w-lg mx-auto shadow-xl"
+        >
+          <h3 className="text-red-400 font-display font-bold text-lg md:text-2xl tracking-widest uppercase mb-3">
+            Total Donors
+          </h3>
+          <div className="text-6xl md:text-[110px] font-display font-bold text-white leading-none tracking-tighter drop-shadow-[0_0_20px_rgba(220,38,38,0.5)]">
+            {loading ? (
+              <span className="animate-pulse opacity-50">...</span>
+            ) : (
+              <span>{donorCount}</span>
+            )}
           </div>
         </motion.div>
 
-        {/* --- REGISTER BUTTON SECTION --- */}
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="flex flex-col items-center gap-4 z-20 px-4 text-center"
+        {/* Call to Action */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
         >
-            {/* <p className="text-gray-500 font-medium text-base md:text-lg">
-                If you want to donate blood, register here
-            </p> */}
-            {/* <Button 
-                size="lg" 
-                className="bg-red-600 text-white hover:bg-red-700 h-12 px-8 text-lg font-semibold shadow-lg shadow-red-200 rounded-full transition-all hover:scale-105" 
-                onClick={() => setLocation("/register")}
-            >
-                Register Now
-            </Button> */}
+          <Button 
+            size="lg" 
+            className="bg-red-600 text-white hover:bg-red-700 h-16 px-12 text-xl font-bold shadow-[0_0_40px_rgba(220,38,38,0.4)] rounded-full transition-transform hover:scale-105"
+            onClick={() => setLocation("/register")}
+          >
+            Register Now
+            <Heart className="w-6 h-6 ml-3 fill-current" />
+          </Button>
         </motion.div>
-        
-      </div>
 
+      </div>
     </div>
   );
 }

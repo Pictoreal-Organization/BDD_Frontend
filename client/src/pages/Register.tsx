@@ -382,9 +382,9 @@ export default function Register() {
                     {errors.bloodGroup && <p className="text-xs text-red-500">{errors.bloodGroup.message}</p>}
                   </div>
 
-                  <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg flex gap-3">
-                    <Info className="w-5 h-5 text-blue-500 shrink-0" />
-                    <div className="text-sm text-blue-800">
+                  <div className="bg-red-50 border border-red-100 p-4 rounded-lg flex gap-3">
+                    <Info className="w-5 h-5 text-red-500 shrink-0" />
+                    <div className="text-sm text-red-800">
                       <p className="font-semibold mb-1">Eligibility Criteria:</p>
                       <ul className="list-disc list-inside space-y-0.5 opacity-90">
                         <li>Age: 18-65 years</li>

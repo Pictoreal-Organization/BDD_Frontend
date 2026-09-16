@@ -87,7 +87,7 @@ export default function AdminDashboard() {
   const getActionStyle = (status: string) => {
     switch (status) {
       case "approved": return { icon: ShieldCheck, color: "text-emerald-500", bg: "bg-emerald-50" };
-      case "completed": return { icon: Droplet, color: "text-blue-500", bg: "bg-blue-50" };
+      case "completed": return { icon: Droplet, color: "text-red-500", bg: "bg-red-50" };
       case "rejected": return { icon: AlertCircle, color: "text-red-500", bg: "bg-red-50" };
       default: return { icon: UserPlus, color: "text-gray-500", bg: "bg-gray-50" }; // pending/registered
     }
@@ -256,7 +256,7 @@ export default function AdminDashboard() {
               {[
                 { label: "Pending", value: stats.pending, icon: Clock, color: "text-orange-600", bg: "bg-orange-50", border: "border-orange-100" },
                 { label: "Approved", value: stats.approved, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
-                { label: "Completed", value: stats.completed, icon: Droplet, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
+                { label: "Completed", value: stats.completed, icon: Droplet, color: "text-red-600", bg: "bg-red-50", border: "border-red-100" },
                 { label: "Rejected", value: stats.rejected, icon: AlertCircle, color: "text-red-600", bg: "bg-red-50", border: "border-red-100" },
               ].map((stat, i) => (
                 <motion.div
