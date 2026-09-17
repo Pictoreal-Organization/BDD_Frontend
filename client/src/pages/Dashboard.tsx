@@ -86,6 +86,24 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Previous Years Donors Placeholders */}
+        <div className="container mx-auto px-4 mb-12">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+              <span className="text-gray-500 font-medium mb-2 text-sm uppercase tracking-wider">Donors in 2025</span>
+              <span className="text-4xl font-display font-bold text-gray-800">452</span>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+              <span className="text-gray-500 font-medium mb-2 text-sm uppercase tracking-wider">Donors in 2024</span>
+              <span className="text-4xl font-display font-bold text-gray-800">389</span>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+              <span className="text-gray-500 font-medium mb-2 text-sm uppercase tracking-wider">Donors in 2023</span>
+              <span className="text-4xl font-display font-bold text-gray-800">310</span>
+            </div>
+          </div>
+        </div>
+
         {/* PART 3: Blood Grid */}
         <BloodGrid />
 

@@ -1,36 +1,51 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { TrendingUp, Droplet, Heart, HeartHandshake, Plus } from "lucide-react";
+import { User, X, Droplet, Heart, HeartHandshake, Plus } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { FlipClock } from "./FlipClock";
 
 export function Hero() {
   const [, setLocation] = useLocation();
   const [donorCount, setDonorCount] = useState<number>(0);
+  const [latestDonor, setLatestDonor] = useState<string>("Loading...");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCount = async () => {
+    const fetchData = async () => {
       try {
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
-        const response = await fetch(`${API_BASE}/dashboard/stats`);
-        if (response.ok) {
-          const data = await response.json();
+        const cleanBase = API_BASE.replace(/\/$/, ""); 
+
+        // Fetch stats
+        const statsRes = await fetch(`${cleanBase}/dashboard/stats`);
+        if (statsRes.ok) {
+          const data = await statsRes.json();
           setDonorCount(data.completed || 0); 
         }
+
+        // Fetch recent donors
+        const recentRes = await fetch(`${cleanBase}/recent`);
+        if (recentRes.ok) {
+          const recentData = await recentRes.json();
+          if (Array.isArray(recentData) && recentData.length > 0) {
+            setLatestDonor(recentData[0].name);
+          } else {
+            setLatestDonor("Be the first!");
+          }
+        }
       } catch (error) {
-        console.error("Error fetching hero stats:", error);
+        console.error("Error fetching hero data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchCount();
-    const interval = setInterval(fetchCount, 30000);
+    fetchData();
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="relative w-full pt-0 overflow-hidden bg-gradient-to-b from-white to-gray-50/50 pb-24">
+    <div className="relative w-full pt-10 pb-16 overflow-hidden bg-gradient-to-b from-white to-gray-50/50 flex flex-col items-center justify-center min-h-[70vh]">
       
       {/* --- BACKGROUND DOODLES --- */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none select-none z-0">
@@ -45,104 +60,74 @@ export function Hero() {
          <Plus className="absolute bottom-32 left-[40%] w-6 h-6 text-red-300/30 rotate-45" strokeWidth={2} />
       </div>
 
-      {/* --- STATS SECTION --- */}
-      <div className="relative z-10 w-full max-w-[1400px] mx-auto min-h-[500px] flex flex-col justify-center items-center mt-12 md:mt-20">
+      <div className="relative z-10 flex flex-col items-center justify-center w-full mt-8">
         
-        {/* LAYER B: THE LOGOS ("EARS")
-            - Mobile: Flex row, gap for mickey ears, z-0 to sit behind face
-            - Desktop: Absolute positioning to far sides
-        */}
-        <div className="
-            relative z-0 flex justify-center gap-32 mb-[-50px] 
-            md:absolute md:inset-0 md:justify-between md:px-[25%] md:items-center md:mb-0 md:gap-0 md:top-auto md:h-full pointer-events-none
-        ">
-              
-          {/* Left Logo: Pictoreal */}
-          <motion.div 
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.8, type: "spring" }}
-            className="bg-white p-2 md:p-6 rounded-full shadow-xl shadow-red-900/10 border-4 border-red-50 flex items-center justify-center transform hover:scale-110 transition-transform duration-300 pointer-events-auto flex-shrink-0"
-          >
+        {/* Collaboration Section */}
+        <div className="flex items-center gap-6 mb-12">
+          <div className="bg-white p-2 rounded-full shadow-md border border-gray-100 flex items-center justify-center w-24 h-24 md:w-32 md:h-32 relative z-10">
             <img 
               src="/Pictoreal.jpg.jpeg" 
               alt="Pictoreal Logo" 
-              className="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover"
+              className="w-full h-full rounded-full object-cover"
             />
-          </motion.div>
-
-          {/* Right Logo: NSS */}
-          <motion.div 
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 1.0, type: "spring" }}
-            className="bg-white p-2 md:p-6 rounded-full shadow-xl shadow-red-900/10 border-4 border-red-50 flex items-center justify-center transform hover:scale-110 transition-transform duration-300 pointer-events-auto flex-shrink-0"
-          >
+          </div>
+          <X className="w-8 h-8 text-gray-300 relative z-10" strokeWidth={3} />
+          <div className="bg-white p-2 rounded-full shadow-md border border-gray-100 flex items-center justify-center w-24 h-24 md:w-32 md:h-32 relative z-10">
             <img 
               src="/Nss_logo.png" 
               alt="NSS Logo" 
-              className="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover"
+              className="w-full h-full rounded-full object-cover"
             />
-          </motion.div>
+          </div>
         </div>
 
-        {/* LAYER C: TOTAL DONORS CIRCLE ("FACE") 
-            - Z-index 20 to sit ON TOP of the ears
-        */}
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="relative z-20 mb-10"
-        >
-          {/* Main Circle Card */}
-          <div className="w-64 h-64 md:w-80 md:h-80 bg-white rounded-full shadow-[0_20px_50px_-10px_rgba(220,38,38,0.3)] flex flex-col items-center justify-center relative border-[8px] border-white ring-1 ring-gray-100">
-            
-            {/* Inner Dashed Ring Decoration */}
-            <div className="absolute inset-3 rounded-full border-2 border-dashed border-red-100 opacity-60 animate-spin-slow" style={{ animationDuration: '20s' }} />
-            
-            <h3 className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-900 font-display font-bold text-lg md:text-xl mb-2">
-              Total Donors
-            </h3>
+        {/* Title */}
+        <h2 className="text-3xl md:text-4xl font-display font-medium text-gray-800 mb-8 tracking-tight relative z-10">
+          Total Donors
+        </h2>
 
-            <div className="flex flex-col items-center">
-              <span className="text-7xl md:text-8xl font-display font-bold text-gray-900 leading-none tracking-tighter">
-                {loading ? (
-                  <span className="text-red-200 animate-pulse">...</span>
-                ) : (
-                  <span className="text-red-600 drop-shadow-sm">{donorCount}</span>
-                )}
-              </span>
-              
-              
+        {/* Donor Count Visualization (Flip Clock) */}
+        <div className="mb-10 relative z-10">
+          {loading ? (
+            <div className="h-24 md:h-32 flex items-center justify-center">
+              <span className="text-gray-400 animate-pulse text-2xl font-medium">Loading...</span>
             </div>
-            
-            {/* Subtle Pulse Behind */}
-            <div className="absolute -inset-1 rounded-full bg-red-50 -z-10 animate-pulse" />
-          </div>
-        </motion.div>
+          ) : (
+            <FlipClock count={donorCount} />
+          )}
+        </div>
 
-        {/* --- REGISTER BUTTON SECTION --- */}
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="flex flex-col items-center gap-4 z-20 px-4 text-center"
-        >
-            {/* <p className="text-gray-500 font-medium text-base md:text-lg">
-                If you want to donate blood, register here
-            </p> */}
-            {/* <Button 
+        {/* Subtitle */}
+        <h3 className="text-sm md:text-base font-bold text-black tracking-[0.2em] mb-12 uppercase relative z-10 text-center px-4">
+          Together for a healthier life
+        </h3>
+
+        {/* Recent Donor Feature */}
+        <div className="flex items-center bg-white rounded-full p-2 pr-6 md:pr-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative z-10">
+          <div className="w-12 h-12 md:w-14 md:h-14 bg-red-600 rounded-full flex items-center justify-center text-white mr-4 shadow-sm flex-shrink-0">
+            <User size={24} />
+          </div>
+          <div className="flex flex-col justify-center">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Latest Donor</span>
+            <span className="text-lg md:text-xl font-bold text-red-600 leading-tight">{latestDonor}</span>
+            <span className="text-xs md:text-sm text-gray-500 flex items-center mt-0.5">
+              Just Donated Blood <span className="ml-1 text-red-500 text-xs">❤️</span>
+            </span>
+          </div>
+        </div>
+        
+        {/* Register Now Button */}
+        <div className="flex flex-col items-center gap-4 z-20 px-4 text-center mt-12 relative z-10">
+            <Button 
                 size="lg" 
                 className="bg-red-600 text-white hover:bg-red-700 h-12 px-8 text-lg font-semibold shadow-lg shadow-red-200 rounded-full transition-all hover:scale-105" 
                 onClick={() => setLocation("/register")}
             >
                 Register Now
-            </Button> */}
-        </motion.div>
-        
-      </div>
+            </Button>
+        </div>
 
+      </div>
     </div>
   );
 }
