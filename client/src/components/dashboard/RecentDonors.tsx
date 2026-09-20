@@ -85,7 +85,7 @@ export function RecentDonors() {
          <h1 className="text-4xl md:text-5xl font-display font-bold text-gray-900 tracking-tight">
                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-900">The Heroes</span>
             </h1>
-          <p className="text-gray-500">Real-time updates of generous souls saving lives.</p>
+          <p className="text-gray-500">Keep track of the generous souls stepping up to make a difference!</p>
         </div>
         
         <Card className="w-full border-none shadow-xl overflow-hidden bg-white/90 backdrop-blur-sm">
