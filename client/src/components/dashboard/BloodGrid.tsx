@@ -95,7 +95,7 @@ export function BloodGrid() {
                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-900">Blood group Inventory</span>
             </h1>
             <p className="mt-4 text-gray-500 max-w-xl mx-auto text-lg">
-                Real-time updates on blood availability by group. Help us meet our targets.
+                Stay updated on blood availability across every blood group and help us reach those who need it most.
             </p>
         </div>
 
