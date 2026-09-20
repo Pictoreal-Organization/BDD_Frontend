@@ -227,7 +227,7 @@ export default function Register() {
                       <User className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
                       <Input 
                         id="fullName" 
-                        placeholder="Chinmay Patil" 
+                        placeholder="Chinmay Joshi" 
                         className="pl-10" 
                         {...register("fullName")}
                       />
