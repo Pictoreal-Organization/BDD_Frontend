@@ -11,28 +11,17 @@ const AdminRoute = ({ children }: AdminRouteProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
-        const res = await fetch(`${API_BASE}/check-session`, { credentials: 'include' });
-        if (res.ok) {
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-        }
-      } catch (err) {
-        setIsAuthenticated(false);
-      }
-    };
-    checkAuth();
-  }, []);
+    const token = localStorage.getItem("adminToken");
+    if (!token) {
+      setIsAuthenticated(false);
+      setLocation("/admin");
+    } else {
+      setIsAuthenticated(true);
+    }
+  }, [setLocation]);
 
   if (isAuthenticated === null) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"></div>
-      </div>
-    );
+    return null; // Loading state
   }
 
   if (!isAuthenticated) {

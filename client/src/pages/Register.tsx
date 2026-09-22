@@ -322,7 +322,7 @@ export default function Register() {
                           <SelectContent>
                             <SelectItem value="FY">FY (First Year)</SelectItem>
                             <SelectItem value="SY">SY (Second Year)</SelectItem>
-                            <SelectItem value="TE">TY (Third Year)</SelectItem>
+                            <SelectItem value="TE">TE (Third Year)</SelectItem>
                             <SelectItem value="BE">BE (Final Year)</SelectItem>
                           </SelectContent>
                         </Select>

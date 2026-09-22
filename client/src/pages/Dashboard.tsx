@@ -91,7 +91,7 @@ export default function Dashboard() {
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
               <span className="text-gray-500 font-medium mb-2 text-sm uppercase tracking-wider">Donors in 2025</span>
-              <span className="text-4xl font-display font-bold text-gray-800">329</span>
+              <span className="text-4xl font-display font-bold text-gray-800">452</span>
             </div>
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
               <span className="text-gray-500 font-medium mb-2 text-sm uppercase tracking-wider">Donors in 2024</span>

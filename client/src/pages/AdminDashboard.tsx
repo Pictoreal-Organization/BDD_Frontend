@@ -166,9 +166,11 @@ export default function AdminDashboard() {
   const handleLogout = async () => {
     try {
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
-      await fetch(`${API_BASE}/logout`, { credentials: 'include' });
+      await fetch(`${API_BASE}/logout`);
+      localStorage.removeItem('adminToken');
       setLocation("/admin");
     } catch (e) {
+      localStorage.removeItem('adminToken');
       setLocation("/admin");
     }
   };
@@ -177,7 +179,7 @@ export default function AdminDashboard() {
   const handleExport = async (format: 'csv' | 'pdf' | 'excel') => {
     try {
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
-      const response = await fetch(`${API_BASE}/download/${format}`, { credentials: 'include' });
+      const response = await fetch(`${API_BASE}/download/${format}`);
       
       if (!response.ok) {
         throw new Error(`Export failed: ${response.statusText}`);

@@ -88,7 +88,7 @@ export default function Reports() {
         // Parallel Fetch: Inventory & General Stats
         const [invRes, statsRes] = await Promise.all([
           fetch(`${API_BASE}/dashboard/inventory`),
-          fetch(`${API_BASE}/count`, { credentials: 'include' }) // Using registration count endpoint
+          fetch(`${API_BASE}/count`) // Using registration count endpoint
         ]);
 
         // Process Inventory for Bar Chart
@@ -140,9 +140,11 @@ export default function Reports() {
   const handleLogout = async () => {
     try {
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
-      await fetch(`${API_BASE}/logout`, { credentials: 'include' });
+      await fetch(`${API_BASE}/logout`);
+      localStorage.removeItem('adminToken');
       setLocation("/admin");
     } catch (e) {
+      localStorage.removeItem('adminToken');
       setLocation("/admin");
     }
   };
