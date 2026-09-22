@@ -103,7 +103,7 @@ export default function Verification() {
   const fetchTodayCount = useCallback(async () => {
     try {
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
-      const response = await fetch(`${API_BASE}/verify/count`);
+      const response = await fetch(`${API_BASE}/verify/count`, { credentials: 'include' });
       if (response.ok) {
         const data = await response.json();
         setTodayCount(data.count);
@@ -120,7 +120,7 @@ export default function Verification() {
     try {
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
       const params = new URLSearchParams({ query: searchQuery });
-      const response = await fetch(`${API_BASE}/verify/search?${params.toString()}`);
+      const response = await fetch(`${API_BASE}/verify/search?${params.toString()}`, { credentials: 'include' });
       if (response.ok) {
         const data = await response.json();
         setDonors(data.donors);
@@ -142,7 +142,7 @@ export default function Verification() {
         sortBy: "completedAt",
         sortOrder: "desc"
       });
-      const response = await fetch(`${API_BASE}/registrations?${params.toString()}`);
+      const response = await fetch(`${API_BASE}/registrations?${params.toString()}`, { credentials: 'include' });
 
       if (response.ok) {
         const data = await response.json();
@@ -194,7 +194,7 @@ export default function Verification() {
       const API_BASE =
         import.meta.env.VITE_API_URL || "http://localhost:10000/api/donate";
 
-      const response = await fetch(`${API_BASE}/verify/complete`, {
+      const response = await fetch(`${API_BASE}/verify/complete`, { credentials: 'include',
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ donorId: donor.id }),
@@ -238,7 +238,7 @@ export default function Verification() {
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
 
       // We use the status update endpoint to move them to 'rejected'
-      const response = await fetch(`${API_BASE}/status`, {
+      const response = await fetch(`${API_BASE}/status`, { credentials: 'include',
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -279,11 +279,9 @@ export default function Verification() {
   const handleLogout = async () => {
     try {
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000/api/donate';
-      await fetch(`${API_BASE}/logout`);
-      localStorage.removeItem('adminToken');
+      await fetch(`${API_BASE}/logout`, { credentials: 'include' });
       setLocation("/admin");
     } catch (e) {
-      localStorage.removeItem('adminToken');
       setLocation("/admin");
     }
   };

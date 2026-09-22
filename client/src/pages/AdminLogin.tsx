@@ -39,20 +39,17 @@ const AdminLogin = () => {
     });
 
     const data = await res.json();
-    alert(data.message || "Login successful");
-
-    console.log(data);
-    
-    localStorage.setItem("adminToken", "token");
 
     if (!res.ok) {
       alert(data.message || "Invalid credentials");
       return;
     }
 
+    alert(data.message || "Login successful");
+    console.log(data);
+    
     navigate("/admin/dashboard");
 
-    
 } catch (error) {
     console.error("Login error:", error);
     alert("Login failed");
