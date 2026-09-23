@@ -99,7 +99,7 @@ export default function Dashboard() {
             </div>
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
               <span className="text-gray-500 font-medium mb-2 text-sm uppercase tracking-wider">Donors in 2023</span>
-              <span className="text-4xl font-display font-bold text-gray-800">310</span>
+              <span className="text-4xl font-display font-bold text-gray-800">276</span>
             </div>
           </div>
         </div>
