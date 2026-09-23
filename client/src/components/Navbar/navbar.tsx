@@ -227,13 +227,13 @@ export default function Navbar() {
               </div>
             </div>
 
-            <Button 
+            {/* <Button 
               size="lg" 
               className="bg-red-600 text-white hover:bg-red-700 font-semibold shadow-lg shadow-red-200 rounded-full transition-all hover:scale-105 md:h-12 md:px-8 md:text-lg h-8 px-3 text-xs ml-4" 
               onClick={() => setLocation("/register")}
             >
               Register Now
-            </Button>
+            </Button> */}
 
             {/* Mobile Toggle */}
             <button

@@ -117,7 +117,7 @@ export function Hero() {
         </div>
         
         {/* Register Now Button */}
-        <div className="flex flex-col items-center gap-4 z-20 px-4 text-center mt-12 relative z-10">
+        {/* <div className="flex flex-col items-center gap-4 z-20 px-4 text-center mt-12 relative z-10">
             <Button 
                 size="lg" 
                 className="bg-red-600 text-white hover:bg-red-700 h-12 px-8 text-lg font-semibold shadow-lg shadow-red-200 rounded-full transition-all hover:scale-105" 
@@ -125,7 +125,7 @@ export function Hero() {
             >
                 Register Now
             </Button>
-        </div>
+        </div> */}
 
       </div>
     </div>
